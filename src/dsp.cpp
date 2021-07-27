@@ -185,8 +185,8 @@ const string CDsp::makeHeader()
 	szVersion += VERSION;
 	szVersion += ", ";
 	szVersion += GetDateTime2();
-	szVersion += ", 20, ";
-	szVersion += to_string(nSSize);
+	szVersion += ", " + to_string(nChSize);
+	szVersion += ", " + to_string(nSSize);
 	szVersion += "\n";
 
 
