@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "base.h"
 #include "object.h"
@@ -46,7 +47,8 @@ class CLog: public CObject, CBase
 {
 public:
 	ofstream	m_ofs[LOG_MAX];
-
+	vector<string>	m_vFiles;
+	
 public:
 	CLog();
 	~CLog();
@@ -68,6 +70,9 @@ private:
 	int On_MSG_QUIT( long, long);
 	int On_MSG_EVENT( long, long);
 	int On_MSG_TIMER( long, long );
+
+	int getFileList(string szFolder, string szExt);
+		
 };
 
 #endif  // __LOG_H__

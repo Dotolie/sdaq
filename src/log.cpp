@@ -24,6 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <dirent.h>
+#include <algorithm>
+#include <cstdio>
 
 
 #include "object.h"
@@ -39,7 +42,7 @@
 
 
 #define OUT_FOLDER_PATH		"./"
-
+#define MAX_FILES			10
 
 
 #define	TIMER_LOG_ID_0 		(TASK_ID_LOG + 1)
@@ -158,6 +161,7 @@ void CLog::openFile(   int nIdx, string szFolder, string &szEqpId, string &szLoc
 
 	sFileName = szFolder + sPre + GetDateTime() + sExt;
 
+	getFileList(szFolder, "csv");
 
 	DBG_I_N("fNme=%s, nIdx=%d\r\n", sFileName.c_str(), nIdx );
 	
@@ -181,10 +185,11 @@ int CLog::openFile(   int nIdx, string szFolder)
 	int nRet = -1;
 	string sFileName;
 	string sPre = "LOG_";
-	string sExt = ".txt";
+	string sExt = ".log";
 
 	sFileName = szFolder + sPre + GetDateTime5() + sExt;
 
+	getFileList(szFolder, "log");
 
 	DBG_I_N("fNme=%s, idx=%d\r\n", sFileName.c_str(), nIdx );
 	
@@ -220,7 +225,7 @@ void CLog::writeData(   int nIdx,  int nSize, float **pData)
 void CLog::writeString(  int nIdx, string &szMsg ) 
 {
 
-	DBG_I_N("<%s>\r\n", szMsg.c_str());
+//	DBG_I_N("<%s>\r\n", szMsg.c_str());
 	
 	try {	
 		m_ofs[nIdx] << szMsg;
@@ -233,7 +238,7 @@ void CLog::writeString(  int nIdx, string &szMsg )
 
 void CLog::writeString(  int nIdx, string szMsg ) 
 {
-	DBG_I_N("<%s>\r\n", szMsg.c_str());
+//	DBG_I_N("<%s>\r\n", szMsg.c_str());
 	
 	try {	
 		m_ofs[nIdx] << szMsg;
@@ -270,5 +275,49 @@ void CLog::pushMsg( int nIdx, string szFolder, string szMsg )
 			}
 		}
 	closeFile( nIdx);
+}
+
+
+int CLog::getFileList(string szFolder, string szExt )
+{
+	int nRet = -1;
+	DIR *dir = NULL;
+	struct dirent *diread = NULL;
+	string szName;
+	
+	if ((dir = opendir(szFolder.c_str())) != nullptr) {
+		while ((diread = readdir(dir)) != nullptr) {
+			szName = diread->d_name;
+			if( szName.find(szExt) != string::npos )
+				m_vFiles.push_back(szName);
+			}
+		closedir (dir);
+
+		sort(m_vFiles.begin(), m_vFiles.end(),[](string &s1, string &s2) { return s1 > s2; });
+		nRet = m_vFiles.size();
+
+		for (int i=0;i<nRet;i++)
+			DBG("i=%02d, %s\r\n", i, m_vFiles[i].c_str());
+		cout << endl;
+
+
+		if( nRet > MAX_FILES) {
+			for( int i=nRet;i>MAX_FILES;i--) {
+				string szPath = szFolder + m_vFiles[i-1];
+				remove(szPath.c_str());
+			
+				DBG_I_N("delete i=%02d, %s\r\n", i, szPath.c_str());			
+				}
+			}
+
+		m_vFiles.clear();
+		
+		}
+	else {
+		DBG_E_R("error opendir()\r\n");
+		}
+	
+
+	return nRet;
 }
 

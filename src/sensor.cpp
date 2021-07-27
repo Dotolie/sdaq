@@ -341,7 +341,7 @@ void CSensor::Run()
 	while(IsRun()) {
 		for(int i=0;i<nSSize;i++) {
 			for(int c=0;c<MAX_CH;c++) {
-				m_fRawData[m_nPageIn][c][i] = azfSig[(i+c)%512];
+				m_fRawData[m_nPageIn][c][i] = ((fAval*azfSig[(i+c)%512])-fBval)*fCval;
 				}
 			}
 		usleep(1000000);
