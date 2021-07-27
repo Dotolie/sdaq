@@ -108,6 +108,7 @@ void CDsp::Run()
 	int nLoop = 10;
 	float *pfData[MAX_CH];
 	int nSSize = m_pConfig->m_nSampleRate;
+	int nChSize = m_pConfig->m_nChSize; 
 	CFeature sFeature;
 
 	sFeature.setSVID(m_pConfig->m_DeviceCfg.d_sSVID);
@@ -127,7 +128,7 @@ void CDsp::Run()
 #if 1
 			for(int i=0;i<nSSize/100;i++) {
 				DBG("%04d : ", i);
-				for(int j=0;j<MAX_CH/4;j++) {
+				for(int j=0;j<nChSize/4;j++) {
 					DBG("%6.3f, ", pfData[j][i]);
 					}
 				DBG("\r\n");
@@ -137,7 +138,7 @@ void CDsp::Run()
 			DBG("2-dsp---------%s, sRate=%d\r\n", GetDateTime3().c_str(), nSSize);
 
 			if( m_pConfig->m_DeviceCfg.d_nMode & MODE_REALTIME) {
-				sFeature.processingWith(nSSize, pfData);
+				sFeature.processingWith(nSSize, nChSize, pfData);
 				string szFeatrues =	sFeature.getFeatures();
 				m_pCore->m_pServer->SendFeaturesAll(m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_nTRID, szFeatrues);
 				DBG("%s\r\n", szFeatrues.c_str());
@@ -149,7 +150,7 @@ void CDsp::Run()
 					g_Log.writeString(LOG_DSP, makeHeader());
 					}
 
-				g_Log.writeData(LOG_DSP, nSSize, pfData);
+				g_Log.writeData(LOG_DSP, nSSize, nChSize, pfData);
 
 				nIdx++;
 				if( nIdx == nLoop ) {
@@ -175,8 +176,9 @@ void CDsp::Run()
 const string CDsp::makeHeader()
 {
 	int i;
-	int nSSize	= m_pConfig->m_nSampleRate;	
-
+	int nSSize	= m_pConfig->m_nSampleRate;
+	int nChSize = m_pConfig->m_nChSize;
+	
 	string szTitle = "Version, Start Time, Channel Cnt, Sampling\n";
 
 	string szVersion = "Ver";
@@ -189,7 +191,7 @@ const string CDsp::makeHeader()
 
 
 	string szContents = "";
-	for(i=0;i<(MAX_CH-1);i++) szContents +="CH" + to_string(i+1) + ",";
+	for(i=0;i<(nChSize-1);i++) szContents +="CH" + to_string(i+1) + ",";
 	szContents += "CH" + to_string(i+1) + "\n";
 	
 	string szHeader = szTitle;

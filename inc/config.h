@@ -66,6 +66,7 @@ class CConfig : public CBase
 public:
 	int m_nDebug;
 	int m_nSampleRate;
+	int m_nChSize;
 	CONFIG_t m_DeviceCfg;	
 
 public:

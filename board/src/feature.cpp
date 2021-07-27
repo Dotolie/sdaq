@@ -42,7 +42,7 @@ CFeature::~CFeature()
 	DBG_I_C("destroy id=%p\r\n", GetId() );
 }
 
-int CFeature::processingWith(int nSRate, float **pfDatas)
+int CFeature::processingWith(int nSRate, int nChSize, float **pfDatas)
 {
 	int nRet = 0;
 	float fTempSum = 0.0f;
@@ -50,7 +50,7 @@ int CFeature::processingWith(int nSRate, float **pfDatas)
 	float fTempMax = 0.0f;
 	float fTempAvg = 0.0f;
 	
-	for(int ch=0;ch<MAX_CH;ch++) {
+	for(int ch=0;ch<nChSize;ch++) {
 		fTempSum = 0.0f;
 		fTempAvg = 0.0f;
 		fTempMin = FLT_MAX;

@@ -207,13 +207,13 @@ int CLog::openFile(   int nIdx, string szFolder)
 	return nRet;
 }
 
-void CLog::writeData(   int nIdx,  int nSize, float **pData)
+void CLog::writeData(   int nIdx,  int nSRate, int nChSize, float **pData)
 {
 	int j;
 
 	try {
-		for(int i=0;i<nSize;i++) {
-			for(j=0;j<(MAX_CH-1);j++) m_ofs[nIdx] << pData[j][i] << ",";
+		for(int i=0;i<nSRate;i++) {
+			for(j=0;j<(nChSize-1);j++) m_ofs[nIdx] << pData[j][i] << ",";
 			m_ofs[nIdx] << pData[j][i] << endl;
 			}
 		}
@@ -295,11 +295,11 @@ int CLog::getFileList(string szFolder, string szExt )
 
 		sort(m_vFiles.begin(), m_vFiles.end(),[](string &s1, string &s2) { return s1 > s2; });
 		nRet = m_vFiles.size();
-
+#if 0
 		for (int i=0;i<nRet;i++)
 			DBG("i=%02d, %s\r\n", i, m_vFiles[i].c_str());
 		cout << endl;
-
+#endif
 
 		if( nRet > MAX_FILES) {
 			for( int i=nRet;i>MAX_FILES;i--) {

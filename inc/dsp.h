@@ -51,22 +51,13 @@ public:
 	CDsp(void *pInst);
 	virtual ~CDsp();
 	
-
 	virtual void Run();
 	virtual void Stop();
 
 
 private:
-	int ExpandToFloat(short *, float *);
-
 	void openFile();
-
 	const string makeHeader();
-	void TestRead(float **);
-	void writeData(float **);
-	void TestRead(short **);
-	void writeData(short **);
-
 	void closeFile();
 
 };

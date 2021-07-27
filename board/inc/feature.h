@@ -71,7 +71,7 @@ public:
 	~CFeature();
 
 	int setSVID(string szConfig);
-	int processingWith(int nSRate, float **pfDatas);
+	int processingWith(int nSRate, int nChSize, float **pfDatas);
 	const string getFeatures();
 };
 	

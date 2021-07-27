@@ -58,7 +58,7 @@ public:
 	void openFile( int nIdx, string szFolder, string &szEqpId, string &szLocation );
 	int openFile( int nIdx, string szFolder );	
 	void pushMsg( int nIdx, string szFolder, string szMsg );
-	void writeData( int nIdx, int nSize, float **pData);
+	void writeData( int nIdx, int nSRate, int nChSize, float **pData);
 	void writeString( int nIdx, string &szMsg );
 	void writeString( int nIdx, string szMsg );	
 	void closeFile( int nIdx );

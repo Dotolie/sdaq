@@ -80,7 +80,7 @@ int CSensor::Read(float** pfData)
 	Lock(); 
 	Wait();
 
-	for(int i=0;i<MAX_CH;i++) {
+	for(int i=0;i<m_pConfig->m_nChSize;i++) {
 		pfData[i] = m_fRawData[m_nPageOut][i];
 		
 	//	DBG("i=%d, pf=%p\r\n", i, pfData[i]);
@@ -327,6 +327,7 @@ void CSensor::Run()
 	int nIdx = 0;
 	int nMode = 0;
 	int nSSize = m_pConfig->m_nSampleRate;
+	int nChSize = m_pConfig->m_nChSize;
 	float fAval = m_pConfig->m_DeviceCfg.d_fAval;
 	float fBval = m_pConfig->m_DeviceCfg.d_fBval;
 	float fCval = m_pConfig->m_DeviceCfg.d_fCval;
@@ -340,7 +341,7 @@ void CSensor::Run()
 	DBG_I_N("run : start \r\n");
 	while(IsRun()) {
 		for(int i=0;i<nSSize;i++) {
-			for(int c=0;c<MAX_CH;c++) {
+			for(int c=0;c<nChSize;c++) {
 				m_fRawData[m_nPageIn][c][i] = ((fAval*azfSig[(i+c)%512])-fBval)*fCval;
 				}
 			}

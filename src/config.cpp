@@ -86,21 +86,27 @@ int CConfig::Load()
 	switch(	m_DeviceCfg.d_nSRate ) {
 		case SRATE_1024:
 			m_nSampleRate = 1024;
+			m_nChSize = MAX_CH;
 			break;
 		case SRATE_2048:
 			m_nSampleRate = 2048;
+			m_nChSize = MAX_CH;
 			break;
 		case SRATE_4096:
-			m_nSampleRate = 4096;			
+			m_nSampleRate = 4096;
+			m_nChSize = MAX_CH;	
 			break;
 		case SRATE_8192:
-			m_nSampleRate = 8192;			
+			m_nSampleRate = 8192;
+			m_nChSize = MAX_CH;
 			break;
 		case SRATE_65536:
 			m_nSampleRate = 65536;
+			m_nChSize = 4;			
 			break;
 		default:
 			m_nSampleRate = 1024;
+			m_nChSize = MAX_CH;			
 			break;
 		}
 #if 0
