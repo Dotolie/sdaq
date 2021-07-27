@@ -1,0 +1,11 @@
+*.so
+*.a
+bin/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+*.ini
+*.cfg
+install_manifest.txt
+cmake_install.cmake
+sdaq
