@@ -56,7 +56,6 @@ using namespace std;
 extern CTimerMgr g_TimerMgr;
 extern CTaskMgr  g_TaskMgr;
 
-CLog g_Log;
 
 
 CLog::CLog() : CBase(__func__)

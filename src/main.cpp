@@ -32,6 +32,8 @@
 #include "msg.h"
 #include "taskMgr.h"
 #include "timerMgr.h"
+#include "core.h"
+#include "log.h"
 
 
 #define DEBUG
@@ -42,8 +44,10 @@ using namespace std;
 
 
 
-CTaskMgr g_TaskMgr;
-CTimerMgr g_TimerMgr;
+CTaskMgr 	g_TaskMgr;
+CTimerMgr 	g_TimerMgr;
+CCore 		g_Core;
+CLog		g_Log;
 
 
 
@@ -83,7 +87,7 @@ int main ( int argc, char** argv )
 	DBG("=====> %s Start v%s <=====\r\n",  argv[0], VERSION);
 
 	register_signal();
-
+	
 	g_TaskMgr.Run();
 
 	DBG("=====> %s end <=====\r\n", argv[0]);

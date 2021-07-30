@@ -39,7 +39,7 @@
 
 CConfig::CConfig() : CBase(__func__)
 {
-	DBG_I_C("create id=%p, %s\r\n", GetId());
+	DBG_I_C("create id=%p\r\n", GetId());
 }
 
 CConfig::~CConfig()
