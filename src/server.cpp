@@ -150,16 +150,16 @@ void CServer::Run()
 					m_nFds[pSock->m_nSock] = CONNECTED;
 					m_pClient_socket[pSock->m_nSock] = pSock;
 
-					user_data = (struct udata *)malloc(sizeof(user_data));
-					user_data->fd = pSock->m_nSock;
-					strcpy(user_data->name, inet_ntoa(pSock->m_addr.sin_addr));
+					user_data = (struct udata *)malloc(sizeof(struct udata));
 
-					szMsg = "connect from : ";
-					szMsg += user_data->name;
+					user_data->fd = pSock->m_nSock;
+					sprintf(user_data->name, "%s:%d", inet_ntoa(pSock->m_addr.sin_addr), ntohs(pSock->m_addr.sin_port));
+
+					szMsg = string("connect from ") + user_data->name;
 					g_Log.pushMsg( LOG_SERVER, szPath, szMsg);
 					
 					SendInitMsg(pSock->m_nSock);
-					DBG_I_N("connect[%s:%d] fd=%d\r\n", user_data->name, ntohs(pSock->m_addr.sin_port), user_data->fd );
+					DBG_I_N("connect[%s] fd=%d\r\n", user_data->name, user_data->fd );
 
 					ev.events = EPOLLIN;
 					ev.data.ptr = user_data;
@@ -175,8 +175,7 @@ void CServer::Run()
 					{
 						DBG_I_N("disconnect[%s] fd=%d\r\n", user_data->name, user_data->fd);
 
-						szMsg = "disconnect   : ";
-						szMsg += user_data->name;
+						szMsg = string("disconnect   ") + user_data->name;
 						g_Log.pushMsg( LOG_SERVER, szPath, szMsg);
 
 						epoll_ctl(epollfd, EPOLL_CTL_DEL, user_data->fd, events);
@@ -188,10 +187,7 @@ void CServer::Run()
 					}
 					else
 					{
-						szMsg = user_data->name;
-						szMsg += ":";
-						szMsg += buf;
-						
+						szMsg = string(user_data->name) + ":" + buf;
 //						SendAll(szMsg);
 						DBG_I_N("RcvMsg:%s", szMsg.c_str());
 					}
