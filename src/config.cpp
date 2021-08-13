@@ -148,6 +148,7 @@ int CConfig::Save(int nEnc)
 	ss << ";" << std::endl;
 	ss << "; Generated FDC_CONFIG.cfg file for sdaq" << std::endl;
 	ss << "; " << std::endl;
+	ss << endl;
 
 	ss << "[ADC]" << endl;
 	ss << "Mode = " << m_DeviceCfg.d_nMode << endl;
@@ -155,6 +156,7 @@ int CConfig::Save(int nEnc)
 	ss << "Avalue = " << m_DeviceCfg.d_fAval << endl;
 	ss << "Bvalue = " << m_DeviceCfg.d_fBval << endl;
 	ss << "Cvalue = " << m_DeviceCfg.d_fCval << endl;
+	ss << endl;
 
 	ss << "[COMMON]" << endl;
 	ss << "Interval = "<< m_DeviceCfg.d_nInterval << endl;
@@ -170,11 +172,10 @@ int CConfig::Save(int nEnc)
 	ss << "Location = " << m_DeviceCfg.d_sLocation << endl;
 	ss << "TRID = " << m_DeviceCfg.d_nTRID << endl;
 	ss << "SMPLN = " << m_DeviceCfg.d_nSMPLN << endl;
+	ss << endl;
 	
 	ss << "[SVID]" << endl;
 	ss << "SVID = " << m_DeviceCfg.d_sSVID << endl;
-
-	
 	ss << endl;
 
 	outFile.open(CONFIG_FILE_NAME);

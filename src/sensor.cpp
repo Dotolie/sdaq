@@ -35,8 +35,6 @@
 
 
 
-		
-
 #define OFFSET_FILE_NAME		"./cal.ini"
 
 
@@ -328,6 +326,7 @@ void CSensor::Run()
 	int nMode = 0;
 	int nSSize = m_pConfig->m_nSampleRate;
 	int nChSize = m_pConfig->m_nChSize;
+	static bool bWDI = false;
 	float fAval = m_pConfig->m_DeviceCfg.d_fAval;
 	float fBval = m_pConfig->m_DeviceCfg.d_fBval;
 	float fCval = m_pConfig->m_DeviceCfg.d_fCval;
@@ -355,6 +354,10 @@ void CSensor::Run()
 		Unlock();
 
 		DBG("--adc---------%s, idx=%d\r\n", GetDateTime3().c_str(), nIdx);
+
+		if( bWDI )	{WDI(0); CPU_LED_R(0);}
+		else 		{WDI(1); CPU_LED_R(1);}
+		bWDI = !bWDI;
 
 		usleep(1);	
 		nIdx++;

@@ -24,7 +24,7 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
-
+#include "struct.h"
 #include "runnable.h"
 #include "resource.h"
 #include "config.h"
@@ -45,7 +45,8 @@ protected:
 	CConfig *m_pConfig;
 	int m_nFds[1024];
 	CServerSocket *m_pClient_socket[1024];
-
+	bool m_bLED;
+	
 public:
 	CServer();
 	CServer(void*);

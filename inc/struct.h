@@ -66,13 +66,13 @@ enum {
 };
 
 
-typedef struct {
-	int d_nMainChNo;
-	int d_nSubChNo;
-	int d_nBus;
-	char d_szSpeed[32];
-	char d_szDevice[32];
-} __attribute__((packed)) DSP_t, *DSP_PTR_t;
+#define WDI(x)					system("echo " #x " > /sys/class/leds/wdi/brightness")
+#define PWR_LED_G(x)			system("echo " #x " > /sys/class/leds/pwr_led1/brightness")
+#define PWR_LED_R(x)			system("echo " #x " > /sys/class/leds/pwr_led2/brightness")
+#define CPU_LED_G(x)			system("echo " #x " > /sys/class/leds/cpu_led1/brightness")
+#define CPU_LED_R(x)			system("echo " #x " > /sys/class/leds/cpu_led2/brightness")
+#define WIF_LED_G(x)			system("echo " #x " > /sys/class/leds/wifi_led1/brightness")
+#define WIF_LED_R(x)			system("echo " #x " > /sys/class/leds/wifi_led2/brightness")
 
 
 

@@ -55,8 +55,6 @@
 #define MODE_LOGGING	0x02
 
 
-#define OUT_FOLDER_PATH		"./"
-
 extern CTaskMgr g_TaskMgr;
 extern CLog		g_Log;
 
@@ -146,7 +144,8 @@ void CDsp::Run()
 			
 			if( m_pConfig->m_DeviceCfg.d_nMode & MODE_LOGGING) {
 				if( nIdx == 0)	{
-					g_Log.openFile(LOG_DSP, OUT_FOLDER_PATH, m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_sLocation);
+					string szPath = m_pConfig->m_DeviceCfg.d_sEqpID;
+					g_Log.openFile(LOG_DSP, szPath, m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_sLocation);
 					g_Log.writeString(LOG_DSP, makeHeader());
 					}
 

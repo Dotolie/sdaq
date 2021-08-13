@@ -43,8 +43,6 @@
 #define DISCONNECT		-1
 
 
-#define LOG_FOLDER_PATH		"./"
-
 #define MSG_INIT 	"<Msg><Command>FDCNONSECS_FIRSTREPORT</Command><DataLayer><EqpID></EqpID><ModuleID></ModuleID></DataLayer></Msg>";
 
 
@@ -57,6 +55,9 @@ CServer::CServer() : Runnable(__func__)
 	InitLock();
 	InitCond();
 
+	WIF_LED_G(1);
+	WIF_LED_R(0);
+
 	DBG_I_C("create id=%p\r\n", GetId());	
 }
 
@@ -67,6 +68,10 @@ CServer::CServer(void* pConfig) : Runnable(__func__)
 
 	m_pConfig = (CConfig*)pConfig;
 
+
+	WIF_LED_G(0);
+	WIF_LED_R(0);	
+
 	DBG_I_C("create id=%p\r\n", GetId());	
 }
 
@@ -76,6 +81,9 @@ CServer::~CServer()
 
 	DestLock();
 	DestCond();
+
+	WIF_LED_R(0);
+	m_bLED = true;
 	
 	DBG_I_C("destroy id=%p\r\n", GetId() );
 }
@@ -99,6 +107,7 @@ void CServer::Run()
 	struct udata *user_data;
 	struct epoll_event ev, *events;
 	string szMsg ="";
+	string szPath = m_pConfig->m_DeviceCfg.d_sEqpID;
 	
 	SetRunBit(true);
 	
@@ -108,7 +117,7 @@ void CServer::Run()
 	CServerSocket server( m_pConfig->m_DeviceCfg.d_nPort );		
 	events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * EPOLL_SIZE);
 
-	g_Log.pushMsg( LOG_SERVER, LOG_FOLDER_PATH, "start server");
+	g_Log.pushMsg( LOG_SERVER, szPath, "start server");
 	
 	if((epollfd = epoll_create(100)) == -1) {
 		DBG_E_R("fail epoll create\r\n");
@@ -147,7 +156,7 @@ void CServer::Run()
 
 					szMsg = "connect from : ";
 					szMsg += user_data->name;
-					g_Log.pushMsg( LOG_SERVER, LOG_FOLDER_PATH, szMsg);
+					g_Log.pushMsg( LOG_SERVER, szPath, szMsg);
 					
 					SendInitMsg(pSock->m_nSock);
 					DBG_I_N("connect[%s:%d] fd=%d\r\n", user_data->name, ntohs(pSock->m_addr.sin_port), user_data->fd );
@@ -168,7 +177,7 @@ void CServer::Run()
 
 						szMsg = "disconnect   : ";
 						szMsg += user_data->name;
-						g_Log.pushMsg( LOG_SERVER, LOG_FOLDER_PATH, szMsg);
+						g_Log.pushMsg( LOG_SERVER, szPath, szMsg);
 
 						epoll_ctl(epollfd, EPOLL_CTL_DEL, user_data->fd, events);
 
@@ -191,7 +200,7 @@ void CServer::Run()
 			usleep(1000);
 		}
 
-		g_Log.pushMsg( LOG_SERVER, "./", "stop server");
+		g_Log.pushMsg( LOG_SERVER, szPath, "stop server");
 
 	}
 	catch ( SocketException& e) {
@@ -229,6 +238,10 @@ int CServer::SendInitMsg(int nFd)
 
 	*m_pClient_socket[nFd] << MSG_INIT;;
 
+	if( m_bLED ){ WIF_LED_R(0);}
+	else 		{ WIF_LED_R(1);}
+	m_bLED = !m_bLED;
+
 	return nRet;
 }
 
@@ -246,7 +259,10 @@ int CServer::SendFeaturesAll(string &szEqpid, int nTrid, string &szFeature)
 	szMsg += szFeature;
 
 //	DBG("SendFeatureAll:%s\r\n", szMsg.c_str());	
-	
+	if( m_bLED ){ WIF_LED_R(0);}
+	else 		{ WIF_LED_R(1);}
+	m_bLED = !m_bLED;
+		
 	Lock();
 	for(int j=0;j<EPOLL_SIZE;j++) {
 		if( (m_nFds[j] == CONNECTED )) {

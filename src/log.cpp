@@ -27,7 +27,8 @@
 #include <dirent.h>
 #include <algorithm>
 #include <cstdio>
-
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "object.h"
 #include "taskMgr.h"
@@ -41,7 +42,7 @@
 #include "debug.h"
 
 
-#define OUT_FOLDER_PATH		"./"
+#define OUT_FOLDER_PATH		"/mnt/nand/BackUpLog/"
 #define MAX_FILES			10
 
 
@@ -101,15 +102,11 @@ int CLog::MsgProc(int message, long wparam, long lparam)
 int CLog::On_MSG_CREATE( long wparam, long lparam )
 {
 	int nRet = 0;
-	int nIdx = 0;
-
 	
-	DBG_I_Y("w=%d, l=%d\r\n", wparam, lparam);
+	DBG_I_Y("w=%ld, l=%ld\r\n", wparam, lparam);
 
 
 //	g_TimerMgr.addTimer(TASK_ID_LOG, 10000, TIMER_LOG_ID_0, 0);
-
-_err:
 		
 	return nRet;
 }
@@ -118,7 +115,7 @@ int CLog::On_MSG_TIMER( long wparam, long lparam )
 {
 	int nRet = 0;
 	
-	DBG_I_C("uid=%d,%s\r\n", wparam, GetDateTime2().c_str());
+	DBG_I_C("uid=%ld,%s\r\n", wparam, GetDateTime2().c_str());
 
 	switch(wparam) {
 		case 1:
@@ -126,22 +123,22 @@ int CLog::On_MSG_TIMER( long wparam, long lparam )
 			break;
 		}
 	
-	return 0;
+	return nRet;
 }
 
 int CLog::On_MSG_EVENT( long wparam, long lparam )
 {
 	int nRet = 0;
 	
-	DBG_I_C("uid=%d,%s\r\n", wparam, GetDateTime2().c_str());
+	DBG_I_C("uid=%ld,%s\r\n", wparam, GetDateTime2().c_str());
 
 		
-	return 0;
+	return nRet;
 }
 
 int CLog::On_MSG_QUIT( long wparam, long lparam )
 {
-	DBG_I_P("w=%d, l=%d\r\n", wparam, lparam);
+	DBG_I_P("w=%ld, l=%ld\r\n", wparam, lparam);
 
 //	closeFile(0);
 	closeFile(1);
@@ -154,13 +151,15 @@ int CLog::On_MSG_QUIT( long wparam, long lparam )
 
 void CLog::openFile(   int nIdx, string szFolder, string &szEqpId, string &szLocation)
 {
+	string sPath = OUT_FOLDER_PATH + szFolder;
 	string sFileName;
 	string sPre = szEqpId + "_" + szLocation +"_";
 	string sExt = ".csv";
 
-	sFileName = szFolder + sPre + GetDateTime() + sExt;
+	
+	sFileName = sPath + "/" + sPre + GetDateTime() + sExt;
 
-	getFileList(szFolder, "csv");
+	getFileList(sPath, "csv");
 
 	DBG_I_N("fNme=%s, nIdx=%d\r\n", sFileName.c_str(), nIdx );
 	
@@ -182,15 +181,16 @@ void CLog::openFile(   int nIdx, string szFolder, string &szEqpId, string &szLoc
 int CLog::openFile(   int nIdx, string szFolder)
 {
 	int nRet = -1;
+	string sPath = OUT_FOLDER_PATH + szFolder;
 	string sFileName;
 	string sPre = "LOG_";
 	string sExt = ".log";
 
-	sFileName = szFolder + sPre + GetDateTime5() + sExt;
+	sFileName =  sPath + "/" + sPre + GetDateTime5() + sExt;
 
-	getFileList(szFolder, "log");
+	getFileList(sPath, "log");
 
-	DBG_I_N("fNme=%s, idx=%d\r\n", sFileName.c_str(), nIdx );
+	DBG_I_N("fName=%s, idx=%d\r\n", sFileName.c_str(), nIdx );
 	
 	m_ofs[nIdx].exceptions(ofstream::badbit | ofstream::failbit);
 
@@ -300,12 +300,13 @@ int CLog::getFileList(string szFolder, string szExt )
 		cout << endl;
 #endif
 
-		if( nRet > MAX_FILES) {
-			for( int i=nRet;i>MAX_FILES;i--) {
-				string szPath = szFolder + m_vFiles[i-1];
-				remove(szPath.c_str());
+		if( nRet >= MAX_FILES) {
+			for( int i=nRet;i>=MAX_FILES;i--) {
+				string szFile = szFolder;
+				szFile += "/" + m_vFiles[i-1];
+				remove(szFile.c_str());
 			
-				DBG_I_N("delete i=%02d, %s\r\n", i, szPath.c_str());			
+//				DBG_I_N("delete i=%02d, %s\r\n", i, szFile.c_str());			
 				}
 			}
 
@@ -313,7 +314,13 @@ int CLog::getFileList(string szFolder, string szExt )
 		
 		}
 	else {
-		DBG_E_R("error opendir()\r\n");
+		if (mkdir(szFolder.c_str(), 0777) != -1) {
+			DBG_I_Y("OK mkdir(%s)\r\n", szFolder.c_str());
+			nRet = 0;
+			}
+	    else {
+		    DBG_E_R("error! mkdir(%s)\r\n", szFolder.c_str());
+	    	}
 		}
 	
 
