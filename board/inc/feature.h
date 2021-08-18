@@ -39,9 +39,9 @@
 enum {
 	FT_MIN = 0,
 	FT_MAX,
-	FT_P2P,
-	FT_SUM,
 	FT_AVG,
+	FT_SUM,
+	FT_P2P,
 
 	FT_MAXNO,
 };

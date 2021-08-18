@@ -102,8 +102,7 @@ void CDsp::Stop()
 void CDsp::Run()
 {
 	int ret = 0;
-	int nIdx = 0;
-	int nLoop = 10;
+	long lElaps = 0;
 	float *pfData[MAX_CH];
 	int nSSize = m_pConfig->m_nSampleRate;
 	int nChSize = m_pConfig->m_nChSize; 
@@ -123,7 +122,7 @@ void CDsp::Run()
 			if( !IsRun()) 
 				break;
 
-#if 1
+#if 0
 			for(int i=0;i<nSSize/100;i++) {
 				DBG("%04d : ", i);
 				for(int j=0;j<nChSize/4;j++) {
@@ -136,27 +135,25 @@ void CDsp::Run()
 			DBG("2-dsp---------%s, sRate=%d\r\n", GetDateTime3().c_str(), nSSize);
 
 			if( m_pConfig->m_DeviceCfg.d_nMode & MODE_REALTIME) {
+				lElaps = GetMicrosecondCount();
+				
 				sFeature.processingWith(nSSize, nChSize, pfData);
 				string szFeatrues =	sFeature.getFeatures();
 				m_pCore->m_pServer->SendFeaturesAll(m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_nTRID, szFeatrues);
+
+				lElaps = GetMicrosecondCount() - lElaps;
+				printf("feat elaps=%ld\r\n", lElaps);
+				
 				DBG("%s\r\n", szFeatrues.c_str());
 				}
 			
 			if( m_pConfig->m_DeviceCfg.d_nMode & MODE_LOGGING) {
-				if( nIdx == 0)	{
-					string szPath = m_pConfig->m_DeviceCfg.d_sEqpID;
-					g_Log.openFile(LOG_DSP, szPath, m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_sLocation);
-					g_Log.writeString(LOG_DSP, makeHeader());
-					}
-
-				g_Log.writeData(LOG_DSP, nSSize, nChSize, pfData);
-
-				nIdx++;
-				if( nIdx == nLoop ) {
-					nIdx = 0;
-					g_Log.closeFile(LOG_DSP);
-					}
+				lElaps = GetMicrosecondCount();
+				ret = outLog( nSSize, nChSize, pfData);
+				lElaps = GetMicrosecondCount() - lElaps;
+				printf("Log elaps=%ld\r\n", lElaps);
 				}
+			
 			ret++;
 			usleep(10000);
 			}
@@ -198,6 +195,32 @@ const string CDsp::makeHeader()
 	szHeader += szContents;
 	
 	return szHeader;
+}
+
+int CDsp::outLog( int nSSize, int nChSize, float **ppfData)
+{
+	int nRet = 0;
+	int nLoop = 10;
+	static int nIdx = 0;
+	string szPath = m_pConfig->m_DeviceCfg.d_sEqpID;
+	
+	if( nIdx == 0)	{
+		nRet = g_Log.openFile( szPath, m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_sLocation);
+		nRet = g_Log.writeString( makeHeader());
+		}
+	
+	nRet = g_Log.writeData( nSSize, nChSize, ppfData);
+	
+	nIdx++;
+
+	if( nIdx == nLoop ) {
+		nIdx = 0;
+		nRet = g_Log.closeFile();
+		}
+
+
+
+	return nRet;
 }
 
 

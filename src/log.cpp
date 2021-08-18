@@ -148,6 +148,29 @@ int CLog::On_MSG_QUIT( long wparam, long lparam )
 	return 0;
 }
 
+int CLog::openFile( string szFolder, string &szEqpId, string &szLocation)
+{
+	int nRet = 0;
+	string sPath = OUT_FOLDER_PATH + szFolder;
+	string sFileName;
+	string sPre = szEqpId + "_" + szLocation +"_";
+	string sExt = ".csv";
+
+	
+	sFileName = sPath + "/" + sPre + GetDateTime() + sExt;
+
+	getFileList(sPath, "csv");
+
+	DBG_I_N("fNme=%s\r\n", sFileName.c_str() );
+	
+	m_pFile = fopen( sFileName.c_str(), "a+");
+	if( m_pFile == NULL ) {
+		nRet = -1;
+		DBG_E_R("can't open, %s\r\n", sFileName.c_str());
+		}
+
+	return nRet;
+}
 
 void CLog::openFile(   int nIdx, string szFolder, string &szEqpId, string &szLocation)
 {
@@ -206,6 +229,31 @@ int CLog::openFile(   int nIdx, string szFolder)
 	return nRet;
 }
 
+int CLog::writeData(     int nSRate, int nChSize, float **pData)
+{
+	int nRet = 0;
+	int i = 0;
+	int j = 0;
+	char szTemp[32];
+	char szData[1024];	
+
+	for(i=0;i<nSRate;i++) {
+		szData[0]=0;
+		for(j=0;j<(nChSize-1);j++) {
+			sprintf(szTemp, "%.3f,", pData[j][i] );
+			strcat(szData, szTemp);
+			}
+		sprintf(szTemp, "%.3f\n", pData[j][i] );
+		strcat(szData, szTemp);
+		nRet = fwrite(szData, 1, strlen(szData), m_pFile);
+		fflush(m_pFile);
+		}
+
+//	DBG("i=%d, nRet=%d, sr=%d, ch=%d, len=%d\r\n", i, nRet, nSRate, nChSize, strlen(szData));
+	
+	return nRet;
+}
+
 void CLog::writeData(   int nIdx,  int nSRate, int nChSize, float **pData)
 {
 	int j;
@@ -219,6 +267,18 @@ void CLog::writeData(   int nIdx,  int nSRate, int nChSize, float **pData)
 	catch( ofstream::failure &e) {
 		DBG_E_R("nIdx=%d, %s\r\n", nIdx, e.what());
 		}
+}
+
+int CLog::writeString(   string szMsg ) 
+{
+	int nRet = 0;
+
+	nRet = fwrite(szMsg.c_str(), 1, szMsg.length(), m_pFile);
+	fflush(m_pFile);
+	
+//	DBG_I_N("nRet=%d, %s\r\n", nRet, szMsg.c_str());
+		
+	return nRet;
 }
 
 void CLog::writeString(  int nIdx, string &szMsg ) 
@@ -246,6 +306,18 @@ void CLog::writeString(  int nIdx, string szMsg )
 		DBG_E_R("nIdx=%d, %s\r\n", nIdx, e.what());
 		}
 		
+}
+
+int CLog::closeFile()
+{
+	int nRet = 0;
+
+	nRet = fflush(m_pFile);
+	nRet = fclose(m_pFile);
+
+	DBG_I_N("nRet=%d\r\n", nRet);
+
+	return nRet;
 }
 
 void CLog::closeFile(int nIdx)

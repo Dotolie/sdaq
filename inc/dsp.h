@@ -24,9 +24,6 @@
 #ifndef __DSP_H__
 #define __DSP_H__
 
-#include <iostream>
-#include <fstream>
-#include <time.h>
 #include "runnable.h"
 #include "thread.h"
 #include "config.h"
@@ -44,8 +41,6 @@ private:
 	CCore *m_pCore;
 	CConfig	*m_pConfig;
 
-	ofstream	m_ofs;
-
 	
 public:
 	CDsp(void *pInst);
@@ -56,9 +51,8 @@ public:
 
 
 private:
-	void openFile();
 	const string makeHeader();
-	void closeFile();
+	int	outLog(int nSSize, int nChSize, float **ppfData);
 
 };
 

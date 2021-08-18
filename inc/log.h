@@ -24,6 +24,7 @@
 #ifndef __LOG_H__
 #define __LOG_H__
 
+#include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -46,6 +47,7 @@ enum {
 class CLog: public CObject, CBase
 {
 public:
+	FILE *m_pFile;
 	ofstream	m_ofs[LOG_MAX];
 	vector<string>	m_vFiles;
 	
@@ -55,12 +57,17 @@ public:
 
 	virtual int MsgProc(int message, long wparam, long lparam);
 
+	int openFile(     string szFolder, string &szEqpId, string &szLocation );
 	void openFile( int nIdx, string szFolder, string &szEqpId, string &szLocation );
 	int openFile( int nIdx, string szFolder );	
 	void pushMsg( int nIdx, string szFolder, string szMsg );
+	
+	int writeData( int nSRate, int nChSize, float **pData);
 	void writeData( int nIdx, int nSRate, int nChSize, float **pData);
+	int writeString( string szMsg );
 	void writeString( int nIdx, string &szMsg );
 	void writeString( int nIdx, string szMsg );	
+	int closeFile();
 	void closeFile( int nIdx );
 
 
