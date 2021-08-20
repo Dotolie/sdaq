@@ -12,7 +12,7 @@
 //  MVTech must not be liable for any loss or damage arising from its use.
 //
 //  Module       :
-//  File         : dsp.h
+//  File         : output.cpp
 //  Description  :
 //  Author       : ywkim@mvtech.or.kr
 //  Export       :
@@ -20,35 +20,65 @@
 //
 //------------------------------------------------------------------------------
 
+#include <unistd.h>
 
-#ifndef __DSP_H__
-#define __DSP_H__
-
-#include "runnable.h"
-#include "thread.h"
-#include "config.h"
-#include "core.h"
+#include "output.h"
 
 
 
-using namespace std;
+#define DEBUG
+#include "debug.h"
 
 
 
-class CDsp: public Runnable
+COutput::COutput() : Runnable(__func__)
 {
-private:
-	CCore *m_pCore;
-	CConfig	*m_pConfig;
+	InitLock();
+	InitCond();
 
+	DBG_I_C("create id=%p\r\n", GetId());	
+}
+
+COutput::COutput(void* pParent) : Runnable(__func__)
+{
+	InitLock();
+	InitCond();
+
+	m_pLog = (CLog*)pParent;
+
+
+	DBG_I_C("create id=%p\r\n", GetId());	
+}
+
+COutput::~COutput() 
+{
+	SetRunBit(false);
+
+	DestLock();
+	DestCond();
 	
-public:
-	CDsp(void *pInst);
-	virtual ~CDsp();
+	DBG_I_C("destroy id=%p\r\n", GetId() );
+}
+
+void COutput::Stop()
+{
+	SetRunBit(false);
 	
-	virtual void Run();
-	virtual void Stop();
+//	DBG_I_N("m_bRun=false\r\n");
+}
 
-};
+void COutput::Run()
+{
+//	int nIdx = 0;
 
-#endif  // __DSP_H__
+	SetRunBit(true);
+	
+	while(IsRun()) {
+
+		m_pLog->writeData();
+
+		}
+
+	DBG_I_N("end of loop \r\n");
+}
+

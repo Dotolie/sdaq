@@ -29,6 +29,8 @@
 #include <cstdio>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
+
 
 #include "object.h"
 #include "taskMgr.h"
@@ -36,6 +38,8 @@
 #include "utils.h"
 #include "struct.h"
 #include "log.h"
+#include "output.h"
+#include "version.h"
 
 
 #define DEBUG
@@ -105,7 +109,12 @@ int CLog::On_MSG_CREATE( long wparam, long lparam )
 	
 	DBG_I_Y("w=%ld, l=%ld\r\n", wparam, lparam);
 
-
+	m_nInp = 0;
+	m_nOut = 0;
+	m_nSize = 0;
+	
+	m_pThread = new Thread( new COutput(this) );
+	m_pThread->Start();
 //	g_TimerMgr.addTimer(TASK_ID_LOG, 10000, TIMER_LOG_ID_0, 0);
 		
 	return nRet;
@@ -141,17 +150,19 @@ int CLog::On_MSG_QUIT( long wparam, long lparam )
 	DBG_I_P("w=%ld, l=%ld\r\n", wparam, lparam);
 
 //	closeFile(0);
-	closeFile(1);
+//	closeFile(1);
 //	g_TimerMgr.delTimer( TIMER_LOG_ID_0);
 
+	m_pThread->Stop();
+	delete m_pThread;
 
 	return 0;
 }
 
-int CLog::openFile( string szFolder, string &szEqpId, string &szLocation)
+int CLog::openFile(  string &szEqpId, string &szLocation)
 {
 	int nRet = 0;
-	string sPath = OUT_FOLDER_PATH + szFolder;
+	string sPath = OUT_FOLDER_PATH + szEqpId;
 	string sFileName;
 	string sPre = szEqpId + "_" + szLocation +"_";
 	string sExt = ".csv";
@@ -396,6 +407,123 @@ int CLog::getFileList(string szFolder, string szExt )
 		}
 	
 
+	return nRet;
+}
+
+int CLog::setParam(  string &szEqpId, string &szLocation)
+{
+	int nRet = 0;
+
+	m_szEqpId = szEqpId;
+	m_szLocation = szLocation;
+
+	return nRet;
+}
+
+int CLog::putDatas( int nSRate, int nChSize, float **pData)
+{
+	int nRet = 0;
+	int i = 0;
+	int j = 0;
+
+
+	m_nSRate = nSRate;
+	m_nCSize = nChSize;
+
+	for(j=0;j<nChSize;j++) {
+		memcpy(m_fRawData[m_nInp][j], pData[j], nSRate*4);
+		}
+	m_nInp++;
+	m_nInp %= 10;
+	
+	m_nSize++;
+	
+	
+	DBG_E_R("start--i=%d o=%d s=%d\r\n", m_nInp, m_nOut, m_nSize);
+
+	return nRet;
+}
+
+const string CLog::makeHeader()
+{
+	int i;
+	int nSSize	= m_nSRate;
+	int nChSize = m_nCSize;
+	
+	string szTitle = "Version, Start Time, Channel Cnt, Sampling\n";
+
+	string szVersion = "Ver";
+	szVersion += VERSION;
+	szVersion += ", ";
+	szVersion += GetDateTime2();
+	szVersion += ", " + to_string(nChSize);
+	szVersion += ", " + to_string(nSSize);
+	szVersion += "\n";
+
+
+	string szContents = "";
+	for(i=0;i<(nChSize-1);i++) szContents +="CH" + to_string(i+1) + ",";
+	szContents += "CH" + to_string(i+1) + "\n";
+	
+	string szHeader = szTitle;
+	szHeader += szVersion;
+	szHeader += szContents;
+	
+	return szHeader;
+}
+
+int CLog::writeData(  )
+{
+	int nRet = 0;
+	int i = 0;
+	int j = 0;
+	int nLoop = 10;
+	char szTemp[32];
+	char szData[1024];	
+	static int nIdx = 0;
+	
+	long now = GetMicrosecondCount();
+
+	if( m_nSize > 0 ) {
+	
+		if( nIdx == 0 )	{ 
+			openFile( m_szEqpId, m_szLocation);
+			writeString( makeHeader() );
+			DBG_I_G("openfile\r\n");
+			usleep(1000);
+			}
+
+		for(i=0;i<m_nSRate;i++) {
+			szData[0]=0;
+			for(j=0;j<(m_nCSize-1);j++) {
+				sprintf(szTemp, "%.3f,", m_fRawData[m_nOut][j][i] );
+				strcat(szData, szTemp);
+				}
+			sprintf(szTemp, "%.3f\n", m_fRawData[0][j][i] );
+			strcat(szData, szTemp);
+			nRet = fwrite(szData, 1, strlen(szData), m_pFile);
+			}
+		fflush(m_pFile);
+
+		m_nOut++;
+		m_nOut %= 10;
+		
+		m_nSize--;
+		nIdx++;
+		
+		if( nIdx >= nLoop) {
+			closeFile();
+			DBG_I_Y("closefile : nIdx=%d\r\n", nIdx);
+			nIdx = 0;
+			}
+		now = GetMicrosecondCount() - now;
+		DBG_I_P("wrting time=%ld\r\n", now);
+
+		}
+	else {
+		usleep(1000);
+		}
+	
 	return nRet;
 }
 

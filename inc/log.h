@@ -31,6 +31,7 @@
 
 #include "base.h"
 #include "object.h"
+#include "thread.h"
 
 
 using namespace std;
@@ -50,6 +51,17 @@ public:
 	FILE *m_pFile;
 	ofstream	m_ofs[LOG_MAX];
 	vector<string>	m_vFiles;
+
+	int 	m_nSRate;
+	int		m_nCSize;
+	string	m_szPath;
+	string	m_szEqpId;
+	string	m_szLocation;
+
+	int		m_nInp;
+	int		m_nOut;
+	int		m_nSize;
+	float m_fRawData[10][20][65536];
 	
 public:
 	CLog();
@@ -57,19 +69,22 @@ public:
 
 	virtual int MsgProc(int message, long wparam, long lparam);
 
-	int openFile(     string szFolder, string &szEqpId, string &szLocation );
 	void openFile( int nIdx, string szFolder, string &szEqpId, string &szLocation );
 	int openFile( int nIdx, string szFolder );	
-	void pushMsg( int nIdx, string szFolder, string szMsg );
-	
-	int writeData( int nSRate, int nChSize, float **pData);
+	void pushMsg( int nIdx, string szFolder, string szMsg );	
 	void writeData( int nIdx, int nSRate, int nChSize, float **pData);
-	int writeString( string szMsg );
 	void writeString( int nIdx, string &szMsg );
 	void writeString( int nIdx, string szMsg );	
-	int closeFile();
 	void closeFile( int nIdx );
 
+	int openFile(     string &szEqpId, string &szLocation );
+	int writeData( int nSRate, int nChSize, float **pData);
+	int writeString( string szMsg );
+	int closeFile();
+
+	int setParam( string &szEqpId, string &szLocation);
+	int putDatas( int nSRate, int nChSize, float **pData);
+	int writeData();
 
 	
 private:
@@ -79,7 +94,11 @@ private:
 	int On_MSG_TIMER( long, long );
 
 	int getFileList(string szFolder, string szExt);
-		
+	const string makeHeader();
+
+private:
+	Thread *m_pThread;
+	
 };
 
 #endif  // __LOG_H__

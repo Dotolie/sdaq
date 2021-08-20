@@ -44,7 +44,7 @@
 #include "version.h"
 #include "feature.h"
 #include "log.h"
-
+#include "utils.h"
 
 
 #define DEBUG
@@ -57,20 +57,6 @@
 
 extern CTaskMgr g_TaskMgr;
 extern CLog		g_Log;
-
-
-long int GetMicrosecondCount()
-{
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	return tv.tv_sec*1000000 + tv.tv_usec;
-}
-
-#define GET_TIME(time, code) { \
-        (time) = GetMicrosecondCount(); \
-        code \
-        (time) = GetMicrosecondCount() - (time);\
-    }
 
 
 
@@ -109,7 +95,8 @@ void CDsp::Run()
 	CFeature sFeature;
 
 	sFeature.setSVID(m_pConfig->m_DeviceCfg.d_sSVID);
-	
+	g_Log.setParam( m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_sLocation);
+
 	DBG_I_N("run : sRate=%d\r\n", nSSize );
 
 	SetRunBit(true);
@@ -149,7 +136,7 @@ void CDsp::Run()
 			
 			if( m_pConfig->m_DeviceCfg.d_nMode & MODE_LOGGING) {
 				lElaps = GetMicrosecondCount();
-				ret = outLog( nSSize, nChSize, pfData);
+				g_Log.putDatas( nSSize, nChSize, pfData);
 				lElaps = GetMicrosecondCount() - lElaps;
 				printf("Log elaps=%ld\r\n", lElaps);
 				}
@@ -169,58 +156,5 @@ void CDsp::Run()
 	DBG_I_N("end of loop\r\n");
 }
 
-const string CDsp::makeHeader()
-{
-	int i;
-	int nSSize	= m_pConfig->m_nSampleRate;
-	int nChSize = m_pConfig->m_nChSize;
-	
-	string szTitle = "Version, Start Time, Channel Cnt, Sampling\n";
-
-	string szVersion = "Ver";
-	szVersion += VERSION;
-	szVersion += ", ";
-	szVersion += GetDateTime2();
-	szVersion += ", " + to_string(nChSize);
-	szVersion += ", " + to_string(nSSize);
-	szVersion += "\n";
-
-
-	string szContents = "";
-	for(i=0;i<(nChSize-1);i++) szContents +="CH" + to_string(i+1) + ",";
-	szContents += "CH" + to_string(i+1) + "\n";
-	
-	string szHeader = szTitle;
-	szHeader += szVersion;
-	szHeader += szContents;
-	
-	return szHeader;
-}
-
-int CDsp::outLog( int nSSize, int nChSize, float **ppfData)
-{
-	int nRet = 0;
-	int nLoop = 10;
-	static int nIdx = 0;
-	string szPath = m_pConfig->m_DeviceCfg.d_sEqpID;
-	
-	if( nIdx == 0)	{
-		nRet = g_Log.openFile( szPath, m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_sLocation);
-		nRet = g_Log.writeString( makeHeader());
-		}
-	
-	nRet = g_Log.writeData( nSSize, nChSize, ppfData);
-	
-	nIdx++;
-
-	if( nIdx == nLoop ) {
-		nIdx = 0;
-		nRet = g_Log.closeFile();
-		}
-
-
-
-	return nRet;
-}
 
 

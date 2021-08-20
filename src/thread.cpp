@@ -84,7 +84,7 @@ void Thread::Run() {
 				}
 			}
 		else {
-			DBG_I_Y("non affinity\r\n");
+//			DBG_I_Y("non affinity\r\n");
 			}
 
 		if( m_nPriority != 0 ) {

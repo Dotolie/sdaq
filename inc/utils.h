@@ -31,6 +31,13 @@ extern "C" {
 #endif
 
 
+#define GET_TIME(time, code) { \
+        (time) = GetMicrosecondCount(); \
+        code \
+        (time) = GetMicrosecondCount() - (time);\
+    }
+
+
 double getTimeMS();
 
 const std::string GetDateTime();
@@ -40,6 +47,7 @@ const std::string GetDateTime4();
 const std::string GetDateTime5();
 
 struct timeval GetTimeVal();
+long int GetMicrosecondCount();
 
 
 #ifdef __cplusplus

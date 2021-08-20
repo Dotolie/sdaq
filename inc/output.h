@@ -12,7 +12,7 @@
 //  MVTech must not be liable for any loss or damage arising from its use.
 //
 //  Module       :
-//  File         : dsp.h
+//  File         : output.h
 //  Description  :
 //  Author       : ywkim@mvtech.or.kr
 //  Export       :
@@ -21,34 +21,33 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef __DSP_H__
-#define __DSP_H__
+#ifndef __OUTPUT_H__
+#define __OUTPUT_H__
 
+#include "struct.h"
 #include "runnable.h"
-#include "thread.h"
-#include "config.h"
-#include "core.h"
-
+#include "resource.h"
+#include "log.h"
 
 
 using namespace std;
 
 
-
-class CDsp: public Runnable
+ 
+class COutput: public CResource, public Runnable
 {
 private:
-	CCore *m_pCore;
-	CConfig	*m_pConfig;
-
+	CLog *m_pLog;
 	
 public:
-	CDsp(void *pInst);
-	virtual ~CDsp();
+	COutput();
+	COutput(void* pParent);
+	virtual ~COutput();
 	
+
 	virtual void Run();
 	virtual void Stop();
 
 };
 
-#endif  // __DSP_H__
+#endif  // __OUTPUT_H__

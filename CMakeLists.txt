@@ -36,6 +36,7 @@ FILE(GLOB SRCS
 	src/server.cpp
 	src/sensor.cpp
 	src/dsp.cpp
+	src/output.cpp
 )
 
 
