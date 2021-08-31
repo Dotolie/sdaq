@@ -102,7 +102,7 @@ int CConfig::Load()
 			break;
 		case SRATE_65536:
 			m_nSampleRate = 65536;
-			m_nChSize = 4;			
+			m_nChSize = 5;			
 			break;
 		default:
 			m_nSampleRate = 1024;

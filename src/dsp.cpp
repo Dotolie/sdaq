@@ -89,6 +89,7 @@ void CDsp::Run()
 {
 	int ret = 0;
 	long lElaps = 0;
+	bool bWDI = false;
 	float *pfData[MAX_CH];
 	int nSSize = m_pConfig->m_nSampleRate;
 	int nChSize = m_pConfig->m_nChSize; 
@@ -108,6 +109,10 @@ void CDsp::Run()
 			m_pCore->m_pSensor->Read(pfData);
 			if( !IsRun()) 
 				break;
+			
+			if( bWDI )	{ WDI(0);CPU_LED_R(0);}
+			else 		{ WDI(1);CPU_LED_R(1);}
+			bWDI = !bWDI;
 
 #if 0
 			for(int i=0;i<nSSize/100;i++) {

@@ -478,8 +478,11 @@ int CLog::writeData(  )
 	int i = 0;
 	int j = 0;
 	int nLoop = 10;
-	char szTemp[32];
-	char szData[1024];	
+	int nVal;
+	int nMan;
+	
+	static char szTemp[32];
+	static char szData[1024];	
 	static int nIdx = 0;
 	
 	long now = GetMicrosecondCount();
@@ -492,19 +495,34 @@ int CLog::writeData(  )
 			DBG_I_G("openfile\r\n");
 			usleep(1000);
 			}
-
+#if 0
 		for(i=0;i<m_nSRate;i++) {
 			szData[0]=0;
 			for(j=0;j<(m_nCSize-1);j++) {
-				sprintf(szTemp, "%.3f,", m_fRawData[m_nOut][j][i] );
+				nVal = (int)m_fRawData[m_nOut][j][i];
+				nMan = (int)(m_fRawData[m_nOut][j][i]*1000 - (nVal * 1000)); 
+				sprintf(szTemp, "%d.%d,", nVal, nMan );
 				strcat(szData, szTemp);
 				}
-			sprintf(szTemp, "%.3f\n", m_fRawData[0][j][i] );
+			nVal = (int)m_fRawData[m_nOut][j][i];
+			nMan = (int)(m_fRawData[m_nOut][j][i]*1000 - (nVal * 1000)); 
+			sprintf(szTemp, "%d.%d\n", nVal, nMan );
 			strcat(szData, szTemp);
 			nRet = fwrite(szData, 1, strlen(szData), m_pFile);
 			}
 		fflush(m_pFile);
-
+#else
+		for(i=0;i<m_nSRate;i++) {
+			for(j=0;j<(m_nCSize-1);j++) {
+				nVal = (int)m_fRawData[m_nOut][j][i];
+				nMan = (int)(m_fRawData[m_nOut][j][i]*1000 - (nVal * 1000)); 
+				fprintf(m_pFile, "%d.%d,", nVal, nMan );
+				}
+			nVal = (int)m_fRawData[m_nOut][j][i];
+			nMan = (int)(m_fRawData[m_nOut][j][i]*1000 - (nVal * 1000)); 
+			fprintf(m_pFile, "%d.%d\n", nVal, nMan );
+			}
+#endif
 		m_nOut++;
 		m_nOut %= 10;
 		

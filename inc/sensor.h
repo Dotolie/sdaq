@@ -52,6 +52,7 @@ public:
 	int m_nPageIn;
 	int m_nPageOut;
 
+	unsigned char m_cData[2048 * 5];
 	short m_sRawData[MAX_PG][MAX_CH][MAX_RATE];
 	float m_fRawData[MAX_PG][MAX_CH][MAX_RATE];
 
@@ -64,6 +65,7 @@ public:
 
 private:
 	CConfig	*m_pConfig;
+	int	m_nFpga;
 
 private:
 	int	LoadOffsetFile();
@@ -75,6 +77,9 @@ private:
 	int SetMode(int nRate, int nMode);
 	int StartSampling();
 	int StopSampling();
+	
+	int GpioSetValue(int gpio, int value);
+	int fpgaSet(unsigned char cmd);
 	
 };
 
