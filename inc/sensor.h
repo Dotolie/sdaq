@@ -58,7 +58,7 @@ public:
 
 	typedef struct {
 		short d_sOffset;
-		int	d_nScale;
+		float d_fScale;
 	} PARAMS_t;
 
 	PARAMS_t m_Parameter[MAX_CH];

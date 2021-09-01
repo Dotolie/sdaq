@@ -65,6 +65,8 @@ int CFeature::processingWith(int nSRate, int nChSize, float **pfDatas)
 		m_fFeature[ch][FT_P2P] = fTempMax - fTempMin;
 		m_fFeature[ch][FT_SUM] = fTempSum;
 		m_fFeature[ch][FT_AVG] = fTempAvg = fTempSum/nSRate;
+
+		DBG("ch=%d, %f,%f,%f,%f,%f\r\n", ch, m_fFeature[ch][0], m_fFeature[ch][1], m_fFeature[ch][2], m_fFeature[ch][3], m_fFeature[ch][4]);
 		}
 	
 	return nRet;
@@ -82,9 +84,9 @@ const string CFeature::getFeatures()
 		lSvid = iter->first;
 		pSvid = iter->second;
 	
-		if( pSvid->nCh < MAX_CH && pSvid->nFeature != 0 && pSvid->nFeature <= FT_MAXNO) {
+		if( pSvid->nCh <= MAX_CH && pSvid->nFeature != 0 && pSvid->nFeature <= FT_MAXNO) {
 			if(iter != m_mSvid.begin()) szFeatures += "^";
-			szFeatures += to_string(lSvid) + "=" + to_string(m_fFeature[pSvid->nCh][pSvid->nFeature-1]);
+			szFeatures += to_string(lSvid) + "=" + to_string(m_fFeature[pSvid->nCh-1][pSvid->nFeature-1]);
 			}
 //		DBG("svid=%ld, ch=%d, f=%d, %s, %f\r\n", lSvid, pSvid->nCh, pSvid->nFeature, pSvid->szName.c_str(), m_fFeature[pSvid->nCh][pSvid->nFeature-1]);
 		}
@@ -117,14 +119,15 @@ int CFeature::setSVID(string szConfig)
 	vResults = split(szConfig, '\n');
 
 	for (int i=0;i<vResults.size();i++){
-//		DBG("i=%d, %s\r\n", i, vResults[i].c_str());
+		DBG("i=%d, %s\r\n", i, vResults[i].c_str());
 		vContents = split(vResults[i], '=');
-		for( int j=0;j<vContents.size();j++) {
+		if (vContents.size() == 4) {
 			pSvid = new tSVID;
 			pSvid->nCh = stoi(vContents[2]);
 			pSvid->nFeature = stoi(vContents[3]);
 			pSvid->szName = vContents[0];
 			m_mSvid.insert(pair<long long, tSVID*>(stoll(vContents[1]), pSvid));
+//			printf("ch=%d, v0=%s, v1=%s, v2=%s, v3=%s\r\n", pSvid->nCh, vContents[0].c_str(), vContents[1].c_str(), vContents[2].c_str(), vContents[3].c_str());
 			}
 		}
 

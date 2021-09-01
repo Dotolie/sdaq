@@ -134,7 +134,7 @@ void CDsp::Run()
 				m_pCore->m_pServer->SendFeaturesAll(m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_nTRID, szFeatrues);
 
 				lElaps = GetMicrosecondCount() - lElaps;
-				printf("feat elaps=%ld\r\n", lElaps);
+				DBG_I_C("features elapsed time=%ld\r\n", lElaps);
 				
 				DBG("%s\r\n", szFeatrues.c_str());
 				}
@@ -143,20 +143,17 @@ void CDsp::Run()
 				lElaps = GetMicrosecondCount();
 				g_Log.putDatas( nSSize, nChSize, pfData);
 				lElaps = GetMicrosecondCount() - lElaps;
-				printf("Log elaps=%ld\r\n", lElaps);
+				DBG_I_C("Log elapsed time=%ld\r\n", lElaps);
 				}
 			
 			ret++;
-			usleep(10000);
+			usleep(10);
 			}
 		else {
 			usleep(1000000);
 			DBG("no m_pSensor\r\n");
 			}
 	}
-
-
-
 
 	DBG_I_N("end of loop\r\n");
 }
