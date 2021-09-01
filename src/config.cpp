@@ -76,11 +76,14 @@ int CConfig::Load()
 
 		m_DeviceCfg.d_sSVID = pReader->Get("SVID", "SVID", "");
 
-		m_DeviceCfg.d_nMode = pReader->GetReal("ADC", "Mode", 1);
-		m_DeviceCfg.d_nSRate = pReader->GetReal("ADC", "SampleRate", 1);		
-		m_DeviceCfg.d_fAval = pReader->GetReal("ADC", "Avalue", 5.5);
-		m_DeviceCfg.d_fBval = pReader->GetReal("ADC", "Bvalue", 14.85);
-		m_DeviceCfg.d_fCval = pReader->GetReal("ADC", "Cvalue", 10);		
+		m_DeviceCfg.d_nType = pReader->GetInteger("ADC", "Type", 1);
+		m_DeviceCfg.d_nSRate = pReader->GetInteger("ADC", "SampleRate", 1);
+		m_DeviceCfg.d_nVolt = pReader->GetInteger("ADC", "VoltRange", 4);
+		m_DeviceCfg.d_nMode = pReader->GetInteger("ADC", "Mode", 1);
+		
+		m_DeviceCfg.d_fAval = pReader->GetReal("ADC", "Avalue", 1);
+		m_DeviceCfg.d_fBval = pReader->GetReal("ADC", "Bvalue", 0);
+		m_DeviceCfg.d_fCval = pReader->GetReal("ADC", "Cvalue", 1);		
 		}
 
 	switch(	m_DeviceCfg.d_nSRate ) {
@@ -145,14 +148,23 @@ int CConfig::Save(int nEnc)
 	stringstream ss;
 	string sName;
 	
-	ss << ";" << std::endl;
-	ss << "; Generated FDC_CONFIG.cfg file for sdaq" << std::endl;
-	ss << "; " << std::endl;
+	ss << ";" << endl;
+	ss << "; Generated FDC_CONFIG.cfg file for sdaq" << endl;
+	ss << "; " << endl;
+	ss << "; Type : 1 (diffrential only)" << endl;
+	ss << "; SampleRate : 1 (1024), 2 (2048), 3 (4096), 4 (8192), 5 (65536) Hz" << endl;
+	ss << "; VoltRange : 1 (6to6), 4 (12to12), 7 (24to24)" << endl;
+	ss << "; Mode : 1 (measure), 2 (logging), 3 (meas + log)" << endl;
+	ss << "; f(x) = C*((A*x)-B)" << endl;
+	ss << "; " << endl;		
 	ss << endl;
 
 	ss << "[ADC]" << endl;
-	ss << "Mode = " << m_DeviceCfg.d_nMode << endl;
+	ss << "Type = " << m_DeviceCfg.d_nType << endl;
 	ss << "SampleRate = " << m_DeviceCfg.d_nSRate << endl;
+	ss << "VoltRange = " << m_DeviceCfg.d_nVolt << endl;
+	ss << "Mode = " << m_DeviceCfg.d_nMode << endl;
+	
 	ss << "Avalue = " << m_DeviceCfg.d_fAval << endl;
 	ss << "Bvalue = " << m_DeviceCfg.d_fBval << endl;
 	ss << "Cvalue = " << m_DeviceCfg.d_fCval << endl;
@@ -191,11 +203,13 @@ int CConfig::Save(int nEnc)
 
 int CConfig::SetDefault()
 {
+	m_DeviceCfg.d_nType = 1;	// diffrential only
+	m_DeviceCfg.d_nSRate = 1;	// 1024Hz	
+	m_DeviceCfg.d_nVolt = 4;	// 12to12
 	m_DeviceCfg.d_nMode = 1;	// Realtime
-	m_DeviceCfg.d_nSRate = 1;	// 1024Hz
-	m_DeviceCfg.d_fAval = 5.5;	// ((Val x A)- B) x C
-	m_DeviceCfg.d_fBval = 14.85;
-	m_DeviceCfg.d_fCval = 10.0;
+	m_DeviceCfg.d_fAval = 1;	// ((Val x A)- B) x C
+	m_DeviceCfg.d_fBval = 0;
+	m_DeviceCfg.d_fCval = 1;
 
 	m_DeviceCfg.d_nInterval = 1000;
 	m_DeviceCfg.d_nPort = 9001;

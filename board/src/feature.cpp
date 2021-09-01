@@ -66,7 +66,7 @@ int CFeature::processingWith(int nSRate, int nChSize, float **pfDatas)
 		m_fFeature[ch][FT_SUM] = fTempSum;
 		m_fFeature[ch][FT_AVG] = fTempAvg = fTempSum/nSRate;
 
-		DBG("ch=%d, %f,%f,%f,%f,%f\r\n", ch, m_fFeature[ch][0], m_fFeature[ch][1], m_fFeature[ch][2], m_fFeature[ch][3], m_fFeature[ch][4]);
+//		DBG("ch=%d, %f,%f,%f,%f,%f\r\n", ch, m_fFeature[ch][0], m_fFeature[ch][1], m_fFeature[ch][2], m_fFeature[ch][3], m_fFeature[ch][4]);
 		}
 	
 	return nRet;

@@ -74,7 +74,7 @@ private:
 
 	int OpenDev();
 	int CloseDev();
-	int SetMode(int nRate, int nMode);
+	int SetMode(int nRate, int nType, char cVolt);
 	int StartSampling();
 	int StopSampling();
 	

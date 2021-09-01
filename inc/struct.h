@@ -30,6 +30,9 @@
 #define MAX_CH		20
 #define MAX_RATE	65536
 
+#define MODE_DIFF	1
+#define MODE_SINGLE	2
+
 enum {
 	SRATE_1024 = 1,
 	SRATE_2048,

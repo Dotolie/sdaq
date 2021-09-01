@@ -30,7 +30,7 @@
 #include "INIReader.h"
 #include "error.h"
 #include "utils.h"
-#include "signal512.h"
+//#include "signal512.h"
 
 #define DEBUG
 #include "debug.h"
@@ -62,7 +62,7 @@
 #define ADC_MAX_RANGE			0x07
 #define ADC_6REF_RANGE			0x04
 #define ADC_START				0x80
-#define ADC_DIFF_MODE			0x01
+#define ADC_DIFF_MODE			0x08
 #define ADC_SINGLE_MODE			0x00
 
 
@@ -392,9 +392,11 @@ void CSensor::Run()
 {
 	int nRet = 0;
 	int nIdx = 0;
-	int nMode = 0;
 	int nOffset = 0;
 	int nBuf_idx = 0;
+	int nType = 1; 	// m_pConfig->m_DeviceCfg.d_nType; (only diff type)
+	char cVolt = m_pConfig->m_DeviceCfg.d_nVolt;
+	
 	int nSSize = m_pConfig->m_nSampleRate;			// 1024, 2048, 4096, 8192, 65536
 	int nPSize = nSSize/64;							//   16,   32,   64,  128,  1024
 	int nChSize = m_pConfig->m_nChSize;				//   20,   20,   20,   20,     5
@@ -411,8 +413,11 @@ void CSensor::Run()
 	sit.outbuff = m_cData;
 
 	nRet = OpenDev();
-	nRet = SetMode( nSRate , nMode);
+	if( nRet != ERR_NONE ) goto _err;
+	nRet = SetMode( nSRate , nType, cVolt);
+	if( nRet != ERR_NONE ) goto _err;	
 	nRet = StartSampling();	
+	if( nRet != ERR_NONE ) goto _err;
 
 	SetRunBit(true);
 	
@@ -437,7 +442,7 @@ void CSensor::Run()
 		for(int i=0;i<nPSize;i++) {
 			for(int c=0;c<nChSize;c++) {
 				m_fRawData[m_nPageIn][c][i + nOffset*nPSize] = 
-					(psData[i*8 + (c%4) + (c/4)*1024] - m_Parameter[c].d_sOffset) * m_Parameter[c].d_fScale;
+					((fAval * (psData[i*8 + (c%4) + (c/4)*1024] - m_Parameter[c].d_sOffset) * m_Parameter[c].d_fScale) + fBval) * fCval;
 //				DBG("i=%d, i=%d, c=%d, d[%d][%d] = s[%d]\r\n", (i + nOffset*nPSize), i, c, c, (i + nOffset*nPSize), (i*8 + (c%4) + (c/4)*1024));
 				}
 			}
@@ -507,7 +512,7 @@ int CSensor::CloseDev()
 }
 
 
-int CSensor::SetMode(int nRate, int nMode)
+int CSensor::SetMode(int nRate, int nType, char cVolt)
 {
 	int nRet = -ERR_NOT_OPEND;
 	int nFreq = 0;
@@ -553,7 +558,8 @@ int CSensor::SetMode(int nRate, int nMode)
 	
 			for(int j = 0; j < NUM_ADC_CH; j+=2) {
 				//mode & channel configuration
-				wData[0] = (j << 4) | ADC_6REF_RANGE | ADC_START | (ADC_DIFF_MODE << 3);
+				wData[0] = (j << 4) | ADC_START | (cVolt & 0x07);
+				if( nType == MODE_DIFF) wData[0] |= ADC_DIFF_MODE;				
 				nRet = ioctl(m_nFpga, FPGASPI_REGWRITE, &sit);
 				if (nRet) {
 					DBG_E_R("err! ADC mode set nRet=\n", nRet);
@@ -567,8 +573,13 @@ int CSensor::SetMode(int nRate, int nMode)
 		sit.size = 8;
 
 		for (int i = 0; i < NUM_ADC_CH; i++)
-			if( i < 4 )
-				wData[i] = 0x80 | ((i*2) << 4);
+			if( nType == MODE_DIFF ) {
+				if( i < 4)	wData[i] = 0x80 | ((i*2) << 4);
+				else		wData[i] = 0;
+				}
+			else {
+				wData[i] = 0x80 | (i << 4);
+				}
 	
 		for (int i = 0; i < TOTAL_ADC; i++) {
 			fpgaSet(FPGA_CMD_ADC0 + i);
@@ -601,7 +612,8 @@ int CSensor::SetMode(int nRate, int nMode)
 			}
 
 		nRet = ERR_NONE;
-		DBG_I_N("nRet=%d\r\n", nRet);
+		
+		DBG_I_N("SRate=%d, Freq=%d, fpga=%d, type=%d, volt=0x%02x, nRet=%d\r\n", nRate, nFreq, nFpagFreq, nType, cVolt, nRet);
 		}
 	else {
 		nRet = -ERR_NOT_OPEND;

@@ -38,8 +38,11 @@ using namespace std;
 
 
 typedef struct _CONFIG_t{
-	int d_nMode;
+	int d_nType;
 	int d_nSRate;
+	int d_nVolt;
+	int d_nMode;
+	
 	float d_fAval;
 	float d_fBval;
 	float d_fCval;
