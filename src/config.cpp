@@ -156,7 +156,10 @@ int CConfig::Save(int nEnc)
 	ss << "; VoltRange : 1 (6to6), 4 (12to12), 7 (24to24)" << endl;
 	ss << "; Mode : 1 (measure), 2 (logging), 3 (meas + log)" << endl;
 	ss << "; f(x) = C*((A*x)-B)" << endl;
-	ss << "; " << endl;		
+	ss << "; SVID = (label)=(uid)=(chNo)=(featNo)" << endl;
+	ss << "; chNO : 1 ~ 20 " << endl;
+	ss << "; featNo : 1 (min), 2 (max), 3 (avg), 4 (sum), 5 (p2p)" << endl;
+	ss << "; " << endl;
 	ss << endl;
 
 	ss << "[ADC]" << endl;

@@ -37,6 +37,7 @@ FILE(GLOB SRCS
 	src/sensor.cpp
 	src/dsp.cpp
 	src/output.cpp
+	src/ipsetup.cpp
 )
 
 
