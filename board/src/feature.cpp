@@ -54,7 +54,7 @@ int CFeature::processingWith(int nSRate, int nChSize, float **pfDatas)
 		fTempSum = 0.0f;
 		fTempAvg = 0.0f;
 		fTempMin = FLT_MAX;
-		fTempMax = FLT_MIN;
+		fTempMax = -FLT_MAX;
 		for( int i=0;i<nSRate;i++) {
 			fTempSum += pfDatas[ch][i];
 			if( fTempMin > pfDatas[ch][i] ) fTempMin = pfDatas[ch][i];
