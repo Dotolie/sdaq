@@ -60,7 +60,7 @@ int CIpsetup::Load()
 	int nRet=0;
 	
 	INIReader *pReader = new INIReader(IPSETUP_FILE_NAME);
-	if( pReader->ParseError() == 0 ) {
+	if( pReader->ParseError() >= 0 ) {
 		m_IpCfg.d_sEth0 = pReader->Get("", "eth0", "");
 		m_IpCfg.d_sEth1 = pReader->Get("", "eth1", "");
 		m_IpCfg.d_sWlan0 = pReader->Get("", "wlan0", "");
@@ -69,7 +69,10 @@ int CIpsetup::Load()
 
 		remove( IPSETUP_FILE_NAME );
 
-		DBG_I_G("save file for ipaddress\r\n");
+		DBG_I_G("save & remove ipaddr.ini\r\n");
+		}
+	else {
+		DBG_I_G("can't find ipaddr.ini\r\n");
 		}
 
 	delete pReader;
