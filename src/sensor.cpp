@@ -464,6 +464,7 @@ void CSensor::Run()
 
 	nRet = StopSampling();
 	nRet = CloseDev();
+	nRet = fpgaUnsetAll();
 
 _err:
 	
@@ -694,6 +695,25 @@ int CSensor::GpioSetValue(int gpio, int value)
 	return 0;
 }
 
+int CSensor::GpioUnexport(int gpio)
+{
+	int fd, fd2, fd3;
+	char buf[255]; 
+
+	fd = open("/sys/class/gpio/unexport", O_WRONLY);
+	if (fd < 0) {
+		DBG_E_R("fail unexport %d", gpio);
+		return -1;
+		}
+
+	memset(buf, 0, sizeof(buf));
+	sprintf(buf, "%d", gpio); 
+	write(fd, buf, strlen(buf));
+	close(fd);
+
+	return 0;
+}
+
 int CSensor::fpgaSet(unsigned char cmd)
 {
 	int ret;
@@ -713,4 +733,17 @@ int CSensor::fpgaSet(unsigned char cmd)
 	
 	return 0;
 }
+
+int CSensor::fpgaUnsetAll()
+{
+	int ret;
+
+	ret = GpioUnexport(AD_CMD0);
+	ret = GpioUnexport(AD_CMD1);
+	ret = GpioUnexport(AD_CMD2);
+	ret = GpioUnexport(AD_CMD3);
+	
+	return 0;
+}
+
 

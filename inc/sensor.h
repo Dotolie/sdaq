@@ -80,7 +80,8 @@ private:
 	
 	int GpioSetValue(int gpio, int value);
 	int fpgaSet(unsigned char cmd);
-	
+	int GpioUnexport(int gpio);
+	int fpgaUnsetAll();
 };
 
 #endif  // __SENSOR_H__
