@@ -439,7 +439,7 @@ int CLog::putDatas( int nSRate, int nChSize, float **pData)
 	m_nSize++;
 	
 	
-	DBG_E_R("start--i=%d o=%d s=%d\r\n", m_nInp, m_nOut, m_nSize);
+	DBG_I_N("i=%d o=%d s=%d\r\n", m_nInp, m_nOut, m_nSize);
 
 	return nRet;
 }
@@ -535,7 +535,7 @@ int CLog::writeData(  )
 			nIdx = 0;
 			}
 		now = GetMicrosecondCount() - now;
-		DBG_I_P("wrting time=%ld\r\n", now);
+		DBG_I_C("write elapsed time=%ld\r\n", now);
 
 		}
 	else {

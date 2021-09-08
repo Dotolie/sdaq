@@ -55,7 +55,7 @@ CServer::CServer() : Runnable(__func__)
 	InitLock();
 	InitCond();
 
-	WIF_LED_G(1);
+	WIF_LED_G(0);
 	WIF_LED_R(0);
 
 	DBG_I_C("create id=%p\r\n", GetId());	
@@ -70,7 +70,7 @@ CServer::CServer(void* pConfig) : Runnable(__func__)
 
 
 	WIF_LED_G(0);
-	WIF_LED_R(0);	
+	WIF_LED_R(0);
 
 	DBG_I_C("create id=%p\r\n", GetId());	
 }
@@ -83,7 +83,6 @@ CServer::~CServer()
 	DestCond();
 
 	WIF_LED_R(0);
-	m_bLED = true;
 	
 	DBG_I_C("destroy id=%p\r\n", GetId() );
 }
@@ -97,7 +96,6 @@ void CServer::Stop()
 
 void CServer::Run()
 {
-	int nRet = 0;
 	int i;
 	int readn;
 	int eventn;
@@ -234,9 +232,8 @@ int CServer::SendInitMsg(int nFd)
 
 	*m_pClient_socket[nFd] << MSG_INIT;;
 
-	if( m_bLED ){ WIF_LED_R(0);}
-	else 		{ WIF_LED_R(1);}
-	m_bLED = !m_bLED;
+	if( m_bLED ){ m_bLED=false;WIF_LED_R(0);}
+	else 		{ m_bLED=true;WIF_LED_R(1);}
 
 	return nRet;
 }
@@ -255,10 +252,9 @@ int CServer::SendFeaturesAll(string &szEqpid, int nTrid, string &szFeature)
 	szMsg += szFeature;
 
 //	DBG("SendFeatureAll:%s\r\n", szMsg.c_str());	
-	if( m_bLED ){ WIF_LED_R(0);}
-	else 		{ WIF_LED_R(1);}
-	m_bLED = !m_bLED;
-		
+	if( m_bLED ){ m_bLED=false;WIF_LED_R(0);}
+	else 		{ m_bLED=true;WIF_LED_R(1);}
+
 	Lock();
 	for(int j=0;j<EPOLL_SIZE;j++) {
 		if( (m_nFds[j] == CONNECTED )) {

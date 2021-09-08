@@ -124,7 +124,7 @@ void CDsp::Run()
 				}
 #endif			
 			
-			DBG("2-dsp---------%s, sRate=%d\r\n", GetDateTime3().c_str(), nSSize);
+//			DBG("2-dsp---------%s, sRate=%d\r\n", GetDateTime3().c_str(), nSSize);
 
 			if( m_pConfig->m_DeviceCfg.d_nMode & MODE_REALTIME) {
 				lElaps = GetMicrosecondCount();
@@ -136,14 +136,14 @@ void CDsp::Run()
 				lElaps = GetMicrosecondCount() - lElaps;
 				DBG_I_C("features elapsed time=%ld\r\n", lElaps);
 				
-				DBG("%s\r\n", szFeatrues.c_str());
+//				DBG("%s\r\n", szFeatrues.c_str());
 				}
 			
 			if( m_pConfig->m_DeviceCfg.d_nMode & MODE_LOGGING) {
 				lElaps = GetMicrosecondCount();
 				g_Log.putDatas( nSSize, nChSize, pfData);
 				lElaps = GetMicrosecondCount() - lElaps;
-				DBG_I_C("Log elapsed time=%ld\r\n", lElaps);
+//				DBG_I_C("Log elapsed time=%ld\r\n", lElaps);
 				}
 			
 			ret++;
