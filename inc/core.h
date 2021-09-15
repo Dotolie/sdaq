@@ -30,7 +30,6 @@
 #include "config.h"
 #include "server.h"
 #include "sensor.h"
-#include "getData.h"
 
 
 using namespace std;
