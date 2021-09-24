@@ -62,8 +62,11 @@ int CIpsetup::Load()
 	INIReader *pReader = new INIReader(IPSETUP_FILE_NAME);
 	if( pReader->ParseError() >= 0 ) {
 		m_IpCfg.d_sEth0 = pReader->Get("", "eth0", "");
+		m_IpCfg.d_sGw0 = pReader->Get("", "gw0", "");
 		m_IpCfg.d_sEth1 = pReader->Get("", "eth1", "");
+		m_IpCfg.d_sGw1 = pReader->Get("", "gw1", "");
 		m_IpCfg.d_sWlan0 = pReader->Get("", "wlan0", "");
+		m_IpCfg.d_sWg0 = pReader->Get("", "wg0", "");
 
 		Save();
 
@@ -95,6 +98,9 @@ int CIpsetup::Save()
 		ss << "[Network]" << endl;
 		ss << "DHCP=no" << endl;
 		ss << "Address=" << m_IpCfg.d_sWlan0 << endl;
+		if( m_IpCfg.d_sWg0 != "" ) {
+			ss << "Gateway=" << m_IpCfg.d_sWg0 << endl;
+			}
 		ss << endl;
 
 		outFile.open(IP_WLAN0_FILE_NAME);
@@ -113,6 +119,9 @@ int CIpsetup::Save()
 		ss << "[Network]" << endl;
 		ss << "DHCP=no" << endl;
 		ss << "Address=" << m_IpCfg.d_sEth0 << endl;
+		if( m_IpCfg.d_sGw0 != "" ) {
+			ss << "Gateway=" << m_IpCfg.d_sGw0 << endl;
+			}
 		ss << endl;
 
 		outFile.open(IP_ETH0_FILE_NAME);
@@ -131,6 +140,9 @@ int CIpsetup::Save()
 		ss << "[Network]" << endl;
 		ss << "DHCP=no" << endl;
 		ss << "Address=" << m_IpCfg.d_sEth1 << endl;
+		if( m_IpCfg.d_sGw1 != "" ) {
+			ss << "Gateway=" << m_IpCfg.d_sGw1 << endl;
+			}		
 		ss << endl;
 
 		outFile.open(IP_ETH1_FILE_NAME);

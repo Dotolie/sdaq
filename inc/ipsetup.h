@@ -39,8 +39,11 @@ using namespace std;
 
 typedef struct _IPCONFIG_t{
 	string d_sEth0;
+	string d_sGw0;
 	string d_sEth1;
+	string d_sGw1;
 	string d_sWlan0;
+	string d_sWg0;	
 } IPCONFIG_t;
 
 
