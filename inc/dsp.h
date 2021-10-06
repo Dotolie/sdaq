@@ -40,7 +40,9 @@ class CDsp: public Runnable
 private:
 	CCore *m_pCore;
 	CConfig	*m_pConfig;
-
+	float m_fAval;
+	float m_fBval;
+	float m_fCval;
 	
 public:
 	CDsp(void *pInst);

@@ -11,3 +11,4 @@ Makefile
 install_manifest.txt
 cmake_install.cmake
 sdaq
+inc/version.h

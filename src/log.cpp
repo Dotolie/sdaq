@@ -67,6 +67,8 @@ CLog::CLog() : CBase(__func__)
 {
 	DBG_I_C("create id=%p\r\n", GetId());
 
+	InitLock();
+	InitCond();
 	
 	g_TaskMgr.AddTask(TASK_ID_LOG, this);
 }
@@ -75,6 +77,8 @@ CLog::~CLog()
 {
 	g_TaskMgr.DelTask(TASK_ID_LOG);
 
+	DestCond();
+	DestLock();
 
 	DBG_I_C("destroy id=%p\r\n", GetId() );
 }
@@ -346,7 +350,8 @@ void CLog::closeFile(int nIdx)
 void CLog::pushMsg( int nIdx, string szFolder, string szMsg )
 {
 	int nRet = 0;
-	
+
+	Lock();
 	nRet = openFile( nIdx, szFolder);
 	if( nRet ) {
 		try {	
@@ -357,6 +362,7 @@ void CLog::pushMsg( int nIdx, string szFolder, string szMsg )
 			}
 		}
 	closeFile( nIdx);
+	Unlock();
 }
 
 
@@ -410,12 +416,24 @@ int CLog::getFileList(string szFolder, string szExt )
 	return nRet;
 }
 
-int CLog::setParam(  string &szEqpId, string &szLocation)
+int CLog::setParam(  int nIdx, string &szEqpId, string &szLocation)
 {
 	int nRet = 0;
 
-	m_szEqpId = szEqpId;
-	m_szLocation = szLocation;
+	m_szEqpId[nIdx] = szEqpId;
+	m_szLocation[nIdx] = szLocation;
+
+	return nRet;
+}
+
+int CLog::putDatas( string szMsg)
+{
+	int nRet = 0;
+
+
+
+	
+	DBG_I_N("msg=%s\r\n", szMsg.c_str());
 
 	return nRet;
 }
@@ -472,7 +490,7 @@ const string CLog::makeHeader()
 	return szHeader;
 }
 
-int CLog::writeData(  )
+int CLog::writeData(  int nSvr)
 {
 	int nRet = 0;
 	int i = 0;
@@ -490,7 +508,7 @@ int CLog::writeData(  )
 	if( m_nSize > 0 ) {
 	
 		if( nIdx == 0 )	{ 
-			openFile( m_szEqpId, m_szLocation);
+			openFile( m_szEqpId[nSvr], m_szLocation[nSvr]);
 			writeString( makeHeader() );
 			DBG_I_G("openfile\r\n");
 			usleep(1000);

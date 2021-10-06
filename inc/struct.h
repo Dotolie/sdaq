@@ -28,7 +28,9 @@
 
 #define MAX_PG		2
 #define MAX_CH		20
+#define MAX_HSPEED_CH		5
 #define MAX_RATE	65536
+#define MAX_SERVER	5
 
 #define MODE_DIFF	1
 #define MODE_SINGLE	2
@@ -68,16 +70,12 @@ enum {
 	ADC_MAX,
 };
 
-
-#define WDI(x)					system("echo " #x " > /sys/class/leds/wdi/brightness")
-#define PWR_LED_G(x)			system("echo " #x " > /sys/class/leds/pwr_led1/brightness")
-#define PWR_LED_R(x)			system("echo " #x " > /sys/class/leds/pwr_led2/brightness")
-#define CPU_LED_G(x)			system("echo " #x " > /sys/class/leds/cpu_led1/brightness")
-#define CPU_LED_R(x)			system("echo " #x " > /sys/class/leds/cpu_led2/brightness")
-#define WIF_LED_G(x)			system("echo " #x " > /sys/class/leds/wifi_led1/brightness")
-#define WIF_LED_R(x)			system("echo " #x " > /sys/class/leds/wifi_led2/brightness")
-
-
+typedef struct {
+	bool d_bEnableAvg;
+	float d_fAvalue;
+	float d_fBvalue;
+	float d_fCvalue;
+} fVAL_PARAM_t;
 
 #endif /* __STRUCT_H__ */
 

@@ -23,6 +23,7 @@
 #include <float.h>
 #include <iostream>
 #include <sstream>
+#include <math.h>
 
 #include "feature.h"
 
@@ -42,21 +43,49 @@ CFeature::~CFeature()
 	DBG_I_C("destroy id=%p\r\n", GetId() );
 }
 
+int CFeature::preprocessingWith(int nSRate, int nChSize, float **pfDatas)
+{
+	int nRet = 0;
+	float fSum = 0.0f;
+
+	for(int ch=0;ch<nChSize;ch++) {
+		fSum = 0.0f;
+		for( int i=0;i<nSRate;i++) {
+			fSum += pfDatas[ch][i];
+			}
+		m_fFeature[ch][FT_AVG] = fSum/nSRate;
+		}
+
+	for(int ch=0;ch<nChSize;ch++) {
+		for( int i=0;i<nSRate;i++) {
+			if( m_pfValParams[i].d_bEnableAvg )
+				pfDatas[ch][i] = m_pfValParams[i].d_fCvalue * ((m_pfValParams[i].d_fAvalue*(pfDatas[ch][i] - m_fFeature[ch][FT_AVG]))-m_pfValParams[i].d_fBvalue);
+			else
+				pfDatas[ch][i] = m_pfValParams[i].d_fCvalue * ((m_pfValParams[i].d_fAvalue*pfDatas[ch][i]) - m_pfValParams[i].d_fBvalue);
+			}
+		}
+
+	return nRet;
+}
+
 int CFeature::processingWith(int nSRate, int nChSize, float **pfDatas)
 {
 	int nRet = 0;
+	float fTempSq = 0.0f;
 	float fTempSum = 0.0f;
 	float fTempMin = 0.0f;
 	float fTempMax = 0.0f;
-	float fTempAvg = 0.0f;
-	
+
+//	preprocessingWith(nSRate, nChSize, pfDatas);
+		
 	for(int ch=0;ch<nChSize;ch++) {
+		fTempSq = 0.0f;
 		fTempSum = 0.0f;
-		fTempAvg = 0.0f;
 		fTempMin = FLT_MAX;
 		fTempMax = -FLT_MAX;
 		for( int i=0;i<nSRate;i++) {
 			fTempSum += pfDatas[ch][i];
+			fTempSq = pfDatas[ch][i] * pfDatas[ch][i];
 			if( fTempMin > pfDatas[ch][i] ) fTempMin = pfDatas[ch][i];
 			if( fTempMax < pfDatas[ch][i] ) fTempMax = pfDatas[ch][i];			
 			}
@@ -64,33 +93,55 @@ int CFeature::processingWith(int nSRate, int nChSize, float **pfDatas)
 		m_fFeature[ch][FT_MAX] = fTempMax;
 		m_fFeature[ch][FT_P2P] = fTempMax - fTempMin;
 		m_fFeature[ch][FT_SUM] = fTempSum;
-		m_fFeature[ch][FT_AVG] = fTempAvg = fTempSum/nSRate;
+		m_fFeature[ch][FT_RMS] = sqrt(fTempSq/nSRate);
 
-//		DBG("ch=%d, %f,%f,%f,%f,%f\r\n", ch, m_fFeature[ch][0], m_fFeature[ch][1], m_fFeature[ch][2], m_fFeature[ch][3], m_fFeature[ch][4]);
+//		DBG("ch=%d, %f,%f,%f,%f,%f,%f\r\n", ch, m_fFeature[ch][0], m_fFeature[ch][1], m_fFeature[ch][2], m_fFeature[ch][3], m_fFeature[ch][4], m_fFeature[ch][5]);
 		}
 	
 	return nRet;
 }
 
-const string CFeature::getFeatures()
+const string CFeature::getFeatures(int nIdx)
 {
+	char szTemp[16];
 	string szFeatures;
 	ptSVID pSvid;
 	long long lSvid;
 	map<long long, ptSVID>::iterator iter;
 
 	szFeatures = "{";
-	for(iter=m_mSvid.begin(); iter!=m_mSvid.end(); iter++){
+	for(iter=m_mSvid[nIdx].begin(); iter!=m_mSvid[nIdx].end(); iter++){
 		lSvid = iter->first;
 		pSvid = iter->second;
 	
-		if( pSvid->nCh <= MAX_CH && pSvid->nFeature != 0 && pSvid->nFeature <= FT_MAXNO) {
-			if(iter != m_mSvid.begin()) szFeatures += "^";
-			szFeatures += to_string(lSvid) + "=" + to_string(m_fFeature[pSvid->nCh-1][pSvid->nFeature-1]);
+		if( pSvid->nCh <= MAX_CH && pSvid->nFeature < FT_MAXNO) {
+			if(iter != m_mSvid[nIdx].begin()) szFeatures += "^";
+			sprintf(szTemp, "%.3f", m_fFeature[pSvid->nCh-1][pSvid->nFeature]);
+			szFeatures += to_string(lSvid) + "=" + szTemp;
 			}
 //		DBG("svid=%ld, ch=%d, f=%d, %s, %f\r\n", lSvid, pSvid->nCh, pSvid->nFeature, pSvid->szName.c_str(), m_fFeature[pSvid->nCh][pSvid->nFeature-1]);
 		}
 	szFeatures += "}";
+	
+	return szFeatures;
+}
+const string CFeature::getFeatureValues(int nIdx)
+{
+	char szTemp[16];
+	string szFeatures;
+	ptSVID pSvid;
+	long long lSvid;
+	map<long long, ptSVID>::iterator iter;
+
+	for(iter=m_mSvid[nIdx].begin(); iter!=m_mSvid[nIdx].end(); iter++){
+		lSvid = iter->first;
+		pSvid = iter->second;
+	
+		if( pSvid->nCh <= MAX_CH && pSvid->nFeature < FT_MAXNO) {
+			sprintf(szTemp, "%.3f", m_fFeature[pSvid->nCh-1][pSvid->nFeature]);
+			szFeatures += string(szTemp) + ",";
+			}
+		}
 	
 	return szFeatures;
 }
@@ -109,7 +160,7 @@ vector<string> CFeature::split(string input, char delimiter)
 }
 
 
-int CFeature::setSVID(string szConfig)
+int CFeature::setSVID(int nIdx, string szConfig)
 {
 	int nRet = 0;
 	vector<string> vResults;
@@ -126,7 +177,7 @@ int CFeature::setSVID(string szConfig)
 			pSvid->nCh = stoi(vContents[2]);
 			pSvid->nFeature = stoi(vContents[3]);
 			pSvid->szName = vContents[0];
-			m_mSvid.insert(pair<long long, tSVID*>(stoll(vContents[1]), pSvid));
+			m_mSvid[nIdx].insert(pair<long long, tSVID*>(stoll(vContents[1]), pSvid));
 //			printf("ch=%d, v0=%s, v1=%s, v2=%s, v3=%s\r\n", pSvid->nCh, vContents[0].c_str(), vContents[1].c_str(), vContents[2].c_str(), vContents[3].c_str());
 			}
 		}

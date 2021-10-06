@@ -12,7 +12,7 @@
 //  MVTech must not be liable for any loss or damage arising from its use.
 //
 //  Module       :
-//  File         : feature.h
+//  File         : adcconfig.h
 //  Description  :
 //  Author       : ywkim@mvtech.or.kr
 //  Export       :
@@ -21,67 +21,49 @@
 //------------------------------------------------------------------------------
 
 
-#ifndef __FEATURE_H__
-#define __FEATURE_H__
+#ifndef __ADCCONFIG_H__
+#define __ADCCONFIG_H__
 
 #include <string>
-#include <vector>
-#include <map>
 
 #include "base.h"
 #include "struct.h"
-#include "config.h"
 
 #define DEBUG
 #include "debug.h"
 
 
-enum {
-	FT_AVG = 0,
-	FT_MIN,
-	FT_MAX,
-	FT_RMS,
-	FT_SUM,
-	FT_P2P,
 
-	FT_MAXNO,
-};
-	
 using namespace std;
 
+typedef struct _ADC_CONFIG_t{
+	int d_nType;
+	int d_nSRate;
+	int d_nVolt;
+	int d_nMode;
+} ADC_CONFIG_t;
 
-typedef struct _tsvid {
-	int nCh;
-	int nFeature;
-	string szName;
-} tSVID, *ptSVID;
-
-
-
-class CFeature : public CBase
+class CAdcConfig : public CBase
 {
-protected:
-	int m_nChNo;
-	int m_nSRate;
-	float m_fFeature[MAX_CH][FT_MAXNO];
-	map<long long, ptSVID> m_mSvid[MAX_SERVER];
-	vector<string> split(string input, char delimiter);
-	int preprocessingWith(int nSRate, int nChSize, float **pfDatas);
+public:
+	int m_nDebug;
+	int m_nSampleRate;
+	int m_nChSize;
+	ADC_CONFIG_t m_AdcCfg;
+	fVAL_PARAM_t m_fValParams[MAX_CH];
 	
 public:
-	fVAL_PARAM_t *m_pfValParams;
-	
-public:
-	CFeature();
-	~CFeature();
+	CAdcConfig();
+	~CAdcConfig();
 
-	int setSVID(int, string szConfig);
-	int processingWith(int nSRate, int nChSize, float **pfDatas);	
-	const string getFeatures(int);
-	const string getFeatureValues(int);	
+	int Load();
+	int Save(int);
+	int SetDefault();
+	int SavePeriod(int);
+	int SetDefaultPeriod();
 };
 	
 
 
-#endif	// __FEATURE_H__
+#endif	// __ADCCONFIG_H__
 

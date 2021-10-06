@@ -27,7 +27,7 @@
 #include "thread.h"
 #include "resource.h"
 #include "runnable.h"
-#include "config.h"
+#include "adcconfig.h"
 
 
 
@@ -64,7 +64,7 @@ public:
 	PARAMS_t m_Parameter[MAX_CH];
 
 private:
-	CConfig	*m_pConfig;
+	CAdcConfig	*m_pAdcConfig;
 	int	m_nFpga;
 
 private:

@@ -30,6 +30,7 @@
 #include "config.h"
 #include "server.h"
 #include "sensor.h"
+#include "adcconfig.h"
 
 
 using namespace std;
@@ -39,14 +40,15 @@ using namespace std;
 class CCore: public CObject, CBase
 {
 public:
+	CAdcConfig	*m_pAdcConfig;
 	CConfig	*m_pConfig;
-	CServer *m_pServer;
+	CServer *m_pServer[MAX_SERVER];
 	CSensor *m_pSensor;
 
 private:
 	Thread 	*m_pThreadDsp;
-	Thread 	*m_pThreadServer;
-	Thread 	*m_pThreadSensor;	
+	Thread 	*m_pThreadServer[MAX_SERVER];
+	Thread 	*m_pThreadSensor;
 	
 public:
 	CCore();

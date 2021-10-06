@@ -42,10 +42,9 @@ struct udata
 class CServer: public CResource, public Runnable
 {
 protected:
-	CConfig *m_pConfig;
+	CONFIG_t *m_pDeviceCfg;
 	int m_nFds[1024];
 	CServerSocket *m_pClient_socket[1024];
-	bool m_bLED;
 	
 public:
 	CServer();

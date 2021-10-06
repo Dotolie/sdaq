@@ -24,10 +24,21 @@
 #include <time.h>
 #include <stdio.h>
 #include <string>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include "utils.h"
 
 
+
+#define WDI_PATH			"/sys/class/leds/wdi/brightness"
+#define PWR_LED_G_PATH		"/sys/class/leds/pwr_led1/brightness"
+#define PWR_LED_R_PATH		"/sys/class/leds/pwr_led2/brightness"
+#define CPU_LED_G_PATH		"/sys/class/leds/cpu_led1/brightness"
+#define CPU_LED_R_PATH		"/sys/class/leds/cpu_led2/brightness"
+#define WIF_LED_G_PATH		"/sys/class/leds/wifi_led1/brightness"
+#define WIF_LED_R_PATH		"/sys/class/leds/wifi_led2/brightness"
 
 
 using namespace std;
@@ -131,4 +142,138 @@ long int GetMicrosecondCount()
 	gettimeofday(&tv, NULL);
 	return tv.tv_sec*1000000 + tv.tv_usec;
 }
+
+int WDI(int x)
+{
+	int nFd = 0;
+	char szValue[8];
+	
+	nFd = open(WDI_PATH, O_WRONLY);
+	if (nFd < 0) {
+		printf("fail open %", WDI_PATH);
+		return -1;
+		}
+
+	sprintf(szValue, "%d", x);
+	write(nFd, szValue, strlen(szValue));
+	
+	close(nFd);
+
+	return 0;
+}
+
+int PWR_LED_G(int x)
+{
+	int nFd = 0;
+	char szValue[8];
+	
+	nFd = open(PWR_LED_G_PATH, O_WRONLY);
+	if (nFd < 0) {
+		printf("fail open %", PWR_LED_G_PATH);
+		return -1;
+		}
+
+	sprintf(szValue, "%d", x);
+	write(nFd, szValue, strlen(szValue));
+	
+	close(nFd);
+
+	return 0;
+}
+
+int PWR_LED_R(int x)
+{
+	int nFd = 0;
+	char szValue[8];
+	
+	nFd = open(PWR_LED_R_PATH, O_WRONLY);
+	if (nFd < 0) {
+		printf("fail open %", PWR_LED_R_PATH);
+		return -1;
+		}
+
+	sprintf(szValue, "%d", x);
+	write(nFd, szValue, strlen(szValue));
+	
+	close(nFd);
+
+	return 0;
+}
+
+int CPU_LED_G(int x)
+{
+	int nFd = 0;
+	char szValue[8];
+	
+	nFd = open(CPU_LED_G_PATH, O_WRONLY);
+	if (nFd < 0) {
+		printf("fail open %", CPU_LED_G_PATH);
+		return -1;
+		}
+
+	sprintf(szValue, "%d", x);
+	write(nFd, szValue, strlen(szValue));
+	
+	close(nFd);
+
+	return 0;
+}
+
+int CPU_LED_R(int x)
+{
+	int nFd = 0;
+	char szValue[8];
+	
+	nFd = open(CPU_LED_R_PATH, O_WRONLY);
+	if (nFd < 0) {
+		printf("fail open %", CPU_LED_R_PATH);
+		return -1;
+		}
+
+	sprintf(szValue, "%d", x);
+	write(nFd, szValue, strlen(szValue));
+	
+	close(nFd);
+
+	return 0;
+}
+
+int WIF_LED_G(int x)
+{
+	int nFd = 0;
+	char szValue[8];
+	
+	nFd = open(WIF_LED_G_PATH, O_WRONLY);
+	if (nFd < 0) {
+		printf("fail open %", WIF_LED_G_PATH);
+		return -1;
+		}
+
+	sprintf(szValue, "%d", x);
+	write(nFd, szValue, strlen(szValue));
+	
+	close(nFd);
+
+	return 0;
+}
+
+int WIF_LED_R(int x)
+{
+	int nFd = 0;
+	char szValue[8];
+	
+	nFd = open(WIF_LED_R_PATH, O_WRONLY);
+	if (nFd < 0) {
+		printf("fail open %", WIF_LED_R_PATH);
+		return -1;
+		}
+
+	sprintf(szValue, "%d", x);
+	write(nFd, szValue, strlen(szValue));
+	
+	close(nFd);
+
+	return 0;
+}
+
 

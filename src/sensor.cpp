@@ -111,7 +111,7 @@ CSensor::CSensor(void *pInst) : Runnable(__func__)
 {
 	int nRet = 0;
 
-	m_pConfig = (CConfig*)pInst;
+	m_pAdcConfig = (CAdcConfig*)pInst;
 	
 	m_nPageMax = 2;
 	m_nPageIn = 0;
@@ -147,7 +147,7 @@ int CSensor::Read(float** pfData)
 	Lock(); 
 	Wait();
 
-	for(int i=0;i<m_pConfig->m_nChSize;i++) {
+	for(int i=0;i<m_pAdcConfig->m_nChSize;i++) {
 		pfData[i] = m_fRawData[m_nPageOut][i];
 		
 	//	DBG("i=%d, pf=%p\r\n", i, pfData[i]);
@@ -177,65 +177,11 @@ int CSensor::LoadOffsetFile()
 		SaveOffsetFile( m_Parameter, 0 );
 		}	
 	else {
-		m_Parameter[ADC_CH0].d_sOffset	= pReader->GetInteger("ch0", "offset", 0);
-		m_Parameter[ADC_CH0].d_fScale	= pReader->GetReal("ch0", "scale", 1);
-		
-		m_Parameter[ADC_CH1].d_sOffset	= pReader->GetInteger("ch1", "offset", 0);
-		m_Parameter[ADC_CH1].d_fScale	= pReader->GetReal("ch1", "scale", 1);
-
-		m_Parameter[ADC_CH2].d_sOffset 	= pReader->GetInteger("ch2", "offset", 0);
-		m_Parameter[ADC_CH2].d_fScale	= pReader->GetReal("ch2", "scale", 1);
-
-		m_Parameter[ADC_CH3].d_sOffset 	= pReader->GetInteger("ch3", "offset", 0);
-		m_Parameter[ADC_CH3].d_fScale	= pReader->GetReal("ch3", "scale", 1);
-
-		m_Parameter[ADC_CH4].d_sOffset	= pReader->GetInteger("ch4", "offset", 0);
-		m_Parameter[ADC_CH4].d_fScale	= pReader->GetReal("ch4", "scale", 1);
-		
-		m_Parameter[ADC_CH5].d_sOffset	= pReader->GetInteger("ch5", "offset", 0);
-		m_Parameter[ADC_CH5].d_fScale	= pReader->GetReal("ch5", "scale", 1);
-
-		m_Parameter[ADC_CH6].d_sOffset 	= pReader->GetInteger("ch6", "offset", 0);
-		m_Parameter[ADC_CH6].d_fScale	= pReader->GetReal("ch6", "scale", 1);
-
-		m_Parameter[ADC_CH7].d_sOffset 	= pReader->GetInteger("ch7", "offset", 0);
-		m_Parameter[ADC_CH7].d_fScale	= pReader->GetReal("ch7", "scale", 1);
-
-		m_Parameter[ADC_CH8].d_sOffset	= pReader->GetInteger("ch8", "offset", 0);
-		m_Parameter[ADC_CH8].d_fScale	= pReader->GetReal("ch8", "scale", 1);
-		
-		m_Parameter[ADC_CH9].d_sOffset	= pReader->GetInteger("ch9", "offset", 0);
-		m_Parameter[ADC_CH9].d_fScale	= pReader->GetReal("ch9", "scale", 1);
-
-		m_Parameter[ADC_CH10].d_sOffset = pReader->GetInteger("ch10", "offset", 0);
-		m_Parameter[ADC_CH10].d_fScale	= pReader->GetReal("ch10", "scale", 1);
-
-		m_Parameter[ADC_CH11].d_sOffset = pReader->GetInteger("ch11", "offset", 0);
-		m_Parameter[ADC_CH11].d_fScale	= pReader->GetReal("ch11", "scale", 1);
-
-		m_Parameter[ADC_CH12].d_sOffset	= pReader->GetInteger("ch12", "offset", 0);
-		m_Parameter[ADC_CH12].d_fScale	= pReader->GetReal("ch12", "scale", 1);
-		
-		m_Parameter[ADC_CH13].d_sOffset	= pReader->GetInteger("ch13", "offset", 0);
-		m_Parameter[ADC_CH13].d_fScale	= pReader->GetReal("ch13", "scale", 1);
-
-		m_Parameter[ADC_CH14].d_sOffset = pReader->GetInteger("ch14", "offset", 0);
-		m_Parameter[ADC_CH14].d_fScale	= pReader->GetReal("ch14", "scale", 1);
-
-		m_Parameter[ADC_CH15].d_sOffset = pReader->GetInteger("ch15", "offset", 0);
-		m_Parameter[ADC_CH15].d_fScale	= pReader->GetReal("ch15", "scale", 1);
-
-		m_Parameter[ADC_CH16].d_sOffset	= pReader->GetInteger("ch16", "offset", 0);
-		m_Parameter[ADC_CH16].d_fScale	= pReader->GetReal("ch16", "scale", 1);
-		
-		m_Parameter[ADC_CH17].d_sOffset	= pReader->GetInteger("ch17", "offset", 0);
-		m_Parameter[ADC_CH17].d_fScale	= pReader->GetReal("ch17", "scale", 1);
-
-		m_Parameter[ADC_CH18].d_sOffset = pReader->GetInteger("ch18", "offset", 0);
-		m_Parameter[ADC_CH18].d_fScale	= pReader->GetReal("ch18", "scale", 1);
-
-		m_Parameter[ADC_CH19].d_sOffset = pReader->GetInteger("ch19", "offset", 0);
-		m_Parameter[ADC_CH19].d_fScale	= pReader->GetReal("ch19", "scale", 1);
+		for(int i=0;i<MAX_CH;i++) {
+			string szSection = "ch" + to_string(i+1);
+			m_Parameter[i].d_sOffset= pReader->GetInteger(szSection, "offset", 0);
+			m_Parameter[i].d_fScale	= pReader->GetReal(szSection, "scale", 1);
+			}
 		}
 
 	delete pReader;
@@ -251,113 +197,21 @@ int CSensor::SaveOffsetFile(PARAMS_t *pParam, int nEnc)
 	ofstream outFile;
 	stringstream ss;
 
-	ss << ";" << std::endl;
-	ss << "; Generated cal.ini file for default" << std::endl;
-	ss << ";" << std::endl;
-	ss << "; offset : -500 ~ 500" << std::endl;
-	ss << "; scale  : -1000.0 ~ +1000.0" << std::endl;
-	ss << ";" << std::endl << std::endl;
+	ss << ";" << endl;
+	ss << "; Generated cal.ini file for default" << endl;
+	ss << ";" << endl;
+	ss << "; offset : -50 ~ 50" << endl;
+	ss << "; scale  : -10.0000 ~ +10.0000" << endl;
+	ss << ";" << std::endl << endl;
 
-	ss << "[ch0]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH0].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH0].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch1]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH1].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH1].d_fScale  << std::endl;
-	ss << std::endl;
+	for(int i=0;i<MAX_CH;i++) {
+		string szSection = "[ch" + to_string(i+1) + "]";
 
-	ss << "[ch2]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH2].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH2].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch3]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH3].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH3].d_fScale  << std::endl;
-	ss << std::endl;
-
-	ss << "[ch4]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH4].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH4].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch5]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH5].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH5].d_fScale  << std::endl;
-	ss << std::endl;
-
-	ss << "[ch6]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH6].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH6].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch7]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH7].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH7].d_fScale  << std::endl;
-	ss << std::endl;
-
-	ss << "[ch8]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH8].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH8].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch9]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH9].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH9].d_fScale  << std::endl;
-	ss << std::endl;
-
-	ss << "[ch10]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH10].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH10].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch11]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH11].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH11].d_fScale  << std::endl;
-	ss << std::endl;
-
-	ss << "[ch12]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH12].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH12].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch13]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH13].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH13].d_fScale  << std::endl;
-	ss << std::endl;
-
-	ss << "[ch14]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH14].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH14].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch15]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH15].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH15].d_fScale  << std::endl;
-	ss << std::endl;
-
-	ss << "[ch16]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH16].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH16].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch17]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH17].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH17].d_fScale  << std::endl;
-	ss << std::endl;
-
-	ss << "[ch18]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH18].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH18].d_fScale  << std::endl;
-	ss << std::endl;
-	
-	ss << "[ch19]" << std::endl;
-	ss << "offset = " 	<< pParam[ADC_CH19].d_sOffset << std::endl;
-	ss << "scale = " 	<< pParam[ADC_CH19].d_fScale  << std::endl;
-	ss << std::endl;
-
+		ss << szSection << endl;
+		ss << "offset = "	<< pParam[i].d_sOffset << endl;
+		ss << "scale = "	<< pParam[i].d_fScale  << endl;
+		ss << endl;
+		}
 
 
 	outFile.open(OFFSET_FILE_NAME);
@@ -394,16 +248,13 @@ void CSensor::Run()
 	int nIdx = 0;
 	int nOffset = 0;
 	int nBuf_idx = 0;
-	int nType = 1; 	// m_pConfig->m_DeviceCfg.d_nType; (only diff type)
-	char cVolt = m_pConfig->m_DeviceCfg.d_nVolt;
+	int nType = 1; 	// m_pConfig->m_AdcCfg.d_nType; (only diff type)
+	char cVolt = m_pAdcConfig->m_AdcCfg.d_nVolt;
 	
-	int nSSize = m_pConfig->m_nSampleRate;			// 1024, 2048, 4096, 8192, 65536
-	int nPSize = nSSize/64;							//   16,   32,   64,  128,  1024
-	int nChSize = m_pConfig->m_nChSize;				//   20,   20,   20,   20,     5
-	int nSRate = m_pConfig->m_DeviceCfg.d_nSRate; 	//     1,   2,    3,    4,     5
-	float fAval = m_pConfig->m_DeviceCfg.d_fAval;
-	float fBval = m_pConfig->m_DeviceCfg.d_fBval;
-	float fCval = m_pConfig->m_DeviceCfg.d_fCval;
+	int nSSize = m_pAdcConfig->m_nSampleRate;			// 1024, 2048, 4096, 8192, 65536
+	int nPSize = nSSize/64;								//   16,   32,   64,  128,  1024
+	int nChSize = m_pAdcConfig->m_nChSize;				//   20,   20,   20,   20,     5
+	int nSRate = m_pAdcConfig->m_AdcCfg.d_nSRate;	 	//     1,   2,    3,    4,     5
 
 	short *psData = (short*)m_cData;
 	struct spi_info sit;
@@ -441,8 +292,7 @@ void CSensor::Run()
 #else
 		for(int i=0;i<nPSize;i++) {
 			for(int c=0;c<nChSize;c++) {
-				m_fRawData[m_nPageIn][c][i + nOffset*nPSize] = 
-					((fAval * (psData[i*8 + (c%4) + (c/4)*1024] - m_Parameter[c].d_sOffset) * m_Parameter[c].d_fScale) + fBval) * fCval;
+				m_fRawData[m_nPageIn][c][i + nOffset*nPSize] = 	(psData[i*8 + (c%4) + (c/4)*1024] - m_Parameter[c].d_sOffset) * m_Parameter[c].d_fScale;
 //				DBG("i=%d, i=%d, c=%d, d[%d][%d] = s[%d]\r\n", (i + nOffset*nPSize), i, c, c, (i + nOffset*nPSize), (i*8 + (c%4) + (c/4)*1024));
 				}
 			}

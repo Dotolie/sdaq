@@ -53,6 +53,7 @@
 
 #define	MODE_REALTIME	0x01
 #define MODE_LOGGING	0x02
+#define MODE_MIXED		0x03
 
 
 extern CTaskMgr g_TaskMgr;
@@ -64,7 +65,6 @@ CDsp::CDsp(void   *pInst) : Runnable(__func__)
 {
 	m_pCore = (CCore*)pInst;
 	m_pConfig = m_pCore->m_pConfig;
-
 
 	DBG_I_C("create id=%p\r\n", GetId() );
 }
@@ -91,13 +91,28 @@ void CDsp::Run()
 	long lElaps = 0;
 	bool bWDI = false;
 	float *pfData[MAX_CH];
-	int nSSize = m_pConfig->m_nSampleRate;
-	int nChSize = m_pConfig->m_nChSize; 
+	int nSSize = m_pCore->m_pAdcConfig->m_nSampleRate;
+	int nChSize = m_pCore->m_pAdcConfig->m_nChSize;
 	CFeature sFeature;
-
-	sFeature.setSVID(m_pConfig->m_DeviceCfg.d_sSVID);
-	g_Log.setParam( m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_sLocation);
-
+	
+	sFeature.m_pfValParams = m_pCore->m_pAdcConfig->m_fValParams;
+#if 0
+	for(int i=0;i<MAX_CH;i++) {
+		DBG_I_N("i=%d, Enable=%d, A=%f, B=%f, C=%f\r\n"
+			, i
+			, sFeature.m_pfValParams[i].d_bEnableAvg
+			, sFeature.m_pfValParams[i].d_fAvalue
+			, sFeature.m_pfValParams[i].d_fBvalue
+			, sFeature.m_pfValParams[i].d_fCvalue);
+		}
+#endif	
+	for(int i=0;i<MAX_SERVER;i++) {
+		if( m_pConfig->m_SeverCfg[i].d_nValid != 0) {
+			sFeature.setSVID( i, m_pConfig->m_SeverCfg[i].d_sSVID);
+			g_Log.setParam( i, m_pConfig->m_SeverCfg[i].d_sEqpID, m_pConfig->m_SeverCfg[i].d_sLocation);
+			}
+		}
+	
 	DBG_I_N("run : sRate=%d\r\n", nSSize );
 
 	SetRunBit(true);
@@ -126,25 +141,34 @@ void CDsp::Run()
 			
 //			DBG("2-dsp---------%s, sRate=%d\r\n", GetDateTime3().c_str(), nSSize);
 
-			if( m_pConfig->m_DeviceCfg.d_nMode & MODE_REALTIME) {
+			if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_LOGGING) {
+				lElaps = GetMicrosecondCount();
+				g_Log.putDatas( nSSize, nChSize, pfData);
+				lElaps = GetMicrosecondCount() - lElaps;
+//				DBG_I_C("Log elapsed time=%ld\r\n", lElaps);
+				}
+
+			if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_REALTIME || m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_MIXED ) {
 				lElaps = GetMicrosecondCount();
 				
 				sFeature.processingWith(nSSize, nChSize, pfData);
-				string szFeatrues =	sFeature.getFeatures();
-				m_pCore->m_pServer->SendFeaturesAll(m_pConfig->m_DeviceCfg.d_sEqpID, m_pConfig->m_DeviceCfg.d_nTRID, szFeatrues);
-
+				for(int i=0;i<MAX_SERVER;i++) {
+					if( m_pConfig->m_SeverCfg[i].d_nValid != 0) {
+						string szFeatrues =	sFeature.getFeatures(i);
+						m_pCore->m_pServer[i]->SendFeaturesAll(m_pConfig->m_SeverCfg[i].d_sEqpID, m_pConfig->m_SeverCfg[i].d_nTRID, szFeatrues);
+						if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_MIXED ) {
+							string szValues = sFeature.getFeatureValues(i);
+							g_Log.putDatas(szValues);
+							}
+						}
+					}
 				lElaps = GetMicrosecondCount() - lElaps;
 				DBG_I_C("features elapsed time=%ld\r\n", lElaps);
 				
 //				DBG("%s\r\n", szFeatrues.c_str());
 				}
 			
-			if( m_pConfig->m_DeviceCfg.d_nMode & MODE_LOGGING) {
-				lElaps = GetMicrosecondCount();
-				g_Log.putDatas( nSSize, nChSize, pfData);
-				lElaps = GetMicrosecondCount() - lElaps;
-//				DBG_I_C("Log elapsed time=%ld\r\n", lElaps);
-				}
+
 			
 			ret++;
 			usleep(10);

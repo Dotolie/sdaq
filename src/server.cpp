@@ -55,9 +55,6 @@ CServer::CServer() : Runnable(__func__)
 	InitLock();
 	InitCond();
 
-	WIF_LED_G(0);
-	WIF_LED_R(0);
-
 	DBG_I_C("create id=%p\r\n", GetId());	
 }
 
@@ -66,11 +63,8 @@ CServer::CServer(void* pConfig) : Runnable(__func__)
 	InitLock();
 	InitCond();
 
-	m_pConfig = (CConfig*)pConfig;
+	m_pDeviceCfg = (CONFIG_t*)pConfig;
 
-
-	WIF_LED_G(0);
-	WIF_LED_R(0);
 
 	DBG_I_C("create id=%p\r\n", GetId());	
 }
@@ -82,7 +76,6 @@ CServer::~CServer()
 	DestLock();
 	DestCond();
 
-	WIF_LED_R(0);
 	
 	DBG_I_C("destroy id=%p\r\n", GetId() );
 }
@@ -105,17 +98,17 @@ void CServer::Run()
 	struct udata *user_data;
 	struct epoll_event ev, *events;
 	string szMsg ="";
-	string szPath = m_pConfig->m_DeviceCfg.d_sEqpID;
-	
+	string szPath = m_pDeviceCfg->d_sEqpID;
+	string szServerName = " Server(" + szPath + ":" + to_string(m_pDeviceCfg->d_nPort)+") ";
 	SetRunBit(true);
 	
 	DBG_I_N("run : start \r\n");
 
 
-	CServerSocket server( m_pConfig->m_DeviceCfg.d_nPort );		
+	CServerSocket server( m_pDeviceCfg->d_nPort );		
 	events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * EPOLL_SIZE);
 
-	g_Log.pushMsg( LOG_SERVER, szPath, "start server");
+	g_Log.pushMsg( LOG_SERVER, "", szServerName + "start");
 	
 	if((epollfd = epoll_create(100)) == -1) {
 		DBG_E_R("fail epoll create\r\n");
@@ -153,8 +146,8 @@ void CServer::Run()
 					user_data->fd = pSock->m_nSock;
 					sprintf(user_data->name, "%s:%d", inet_ntoa(pSock->m_addr.sin_addr), ntohs(pSock->m_addr.sin_port));
 
-					szMsg = string("connect from ") + user_data->name;
-					g_Log.pushMsg( LOG_SERVER, szPath, szMsg);
+					szMsg = szServerName + string("connected from ") + user_data->name;
+					g_Log.pushMsg( LOG_SERVER, "", szMsg);
 					
 					SendInitMsg(pSock->m_nSock);
 					DBG_I_N("connect[%s] fd=%d\r\n", user_data->name, user_data->fd );
@@ -173,8 +166,8 @@ void CServer::Run()
 					{
 						DBG_I_N("disconnect[%s] fd=%d\r\n", user_data->name, user_data->fd);
 
-						szMsg = string("disconnect   ") + user_data->name;
-						g_Log.pushMsg( LOG_SERVER, szPath, szMsg);
+						szMsg = szServerName + string("disconnected   ") + user_data->name;
+						g_Log.pushMsg( LOG_SERVER, "", szMsg);
 
 						epoll_ctl(epollfd, EPOLL_CTL_DEL, user_data->fd, events);
 
@@ -194,7 +187,7 @@ void CServer::Run()
 			usleep(1000);
 		}
 
-		g_Log.pushMsg( LOG_SERVER, szPath, "stop server");
+		g_Log.pushMsg( LOG_SERVER, "", szServerName + "stop");
 
 	}
 	catch ( SocketException& e) {
@@ -232,9 +225,6 @@ int CServer::SendInitMsg(int nFd)
 
 	*m_pClient_socket[nFd] << MSG_INIT;;
 
-	if( m_bLED ){ m_bLED=false;WIF_LED_R(0);}
-	else 		{ m_bLED=true;WIF_LED_R(1);}
-
 	return nRet;
 }
 
@@ -251,9 +241,8 @@ int CServer::SendFeaturesAll(string &szEqpid, int nTrid, string &szFeature)
 	szMsg += " LOTID=(NULL) RECPID=(NULL) SENSOR_VALUES=";
 	szMsg += szFeature;
 
-//	DBG("SendFeatureAll:%s\r\n", szMsg.c_str());	
-	if( m_bLED ){ m_bLED=false;WIF_LED_R(0);}
-	else 		{ m_bLED=true;WIF_LED_R(1);}
+	DBG("SendFeatureAll:%s\r\n", szMsg.c_str());	
+
 
 	Lock();
 	for(int j=0;j<EPOLL_SIZE;j++) {

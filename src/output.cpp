@@ -75,7 +75,7 @@ void COutput::Run()
 	
 	while(IsRun()) {
 
-		m_pLog->writeData();
+		m_pLog->writeData(0);
 
 		}
 

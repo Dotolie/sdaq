@@ -27,7 +27,7 @@
 #include <string>
 
 #include "base.h"
-
+#include "struct.h"
 
 #define DEBUG
 #include "debug.h"
@@ -38,15 +38,7 @@ using namespace std;
 
 
 typedef struct _CONFIG_t{
-	int d_nType;
-	int d_nSRate;
-	int d_nVolt;
-	int d_nMode;
-	
-	float d_fAval;
-	float d_fBval;
-	float d_fCval;
-
+	int d_nValid;
 	int d_nInterval;
 	int d_nPort;
 	string d_sDestSubject;
@@ -67,18 +59,17 @@ typedef struct _CONFIG_t{
 class CConfig : public CBase
 {
 public:
-	int m_nDebug;
-	int m_nSampleRate;
-	int m_nChSize;
-	CONFIG_t m_DeviceCfg;	
 
+	int m_nNoConfigs;
+	CONFIG_t m_SeverCfg[MAX_SERVER];
+	
 public:
 	CConfig();
 	~CConfig();
 
 	int Load();
 	int Save(int);
-	int SetDefault();
+	int SetDefault(int);
 	int SavePeriod(int);
 	int SetDefaultPeriod();
 };

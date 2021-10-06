@@ -32,6 +32,8 @@
 #include "base.h"
 #include "object.h"
 #include "thread.h"
+#include "struct.h"
+#include "resource.h"
 
 
 using namespace std;
@@ -45,7 +47,7 @@ enum {
 };
 
 
-class CLog: public CObject, CBase
+class CLog: public CObject, CBase, CResource
 {
 public:
 	FILE *m_pFile;
@@ -55,13 +57,13 @@ public:
 	int 	m_nSRate;
 	int		m_nCSize;
 	string	m_szPath;
-	string	m_szEqpId;
-	string	m_szLocation;
+	string	m_szEqpId[MAX_SERVER];
+	string	m_szLocation[MAX_SERVER];
 
 	int		m_nInp;
 	int		m_nOut;
 	int		m_nSize;
-	float m_fRawData[10][20][65536];
+	float 	m_fRawData[10][20][65536];
 	
 public:
 	CLog();
@@ -82,9 +84,10 @@ public:
 	int writeString( string szMsg );
 	int closeFile();
 
-	int setParam( string &szEqpId, string &szLocation);
+	int setParam( int, string &szEqpId, string &szLocation);
+	int putDatas( string szMsg);
 	int putDatas( int nSRate, int nChSize, float **pData);
-	int writeData();
+	int writeData(int);
 
 	
 private:

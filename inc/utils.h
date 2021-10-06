@@ -49,6 +49,14 @@ const std::string GetDateTime5();
 struct timeval GetTimeVal();
 long int GetMicrosecondCount();
 
+int WDI(int x);
+int PWR_LED_G(int x);
+int PWR_LED_R(int x);
+int CPU_LED_G(int x);
+int CPU_LED_R(int x);
+int WIF_LED_G(int x);
+int WIF_LED_R(int x);
+
 
 #ifdef __cplusplus
 }

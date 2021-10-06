@@ -8,7 +8,7 @@ SET (EXTRA_C_FLAGS "-mfloat-abi=hard -mfpu=neon-fp-armv8")
 SET(BINDIR  ${CMAKE_SOURCE_DIR}/bin)
 SET(AUTHOR_NAME "ywkim")
 
-SET ( PROJECT_VERSION_MAJOR 1 )
+SET ( PROJECT_VERSION_MAJOR 2 )
 SET ( PROJECT_VERSION_MINOR 1 )
 CONFIGURE_FILE ( ${CMAKE_SOURCE_DIR}/version.h.in  ${CMAKE_SOURCE_DIR}/inc/version.h )
 
@@ -26,6 +26,7 @@ FILE(GLOB SRCS
         src/thread.cpp
         src/taskMgr.cpp
         src/timerMgr.cpp
+	src/adcconfig.cpp
 	src/config.cpp
 	src/log.cpp
         src/core.cpp
