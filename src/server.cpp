@@ -108,7 +108,7 @@ void CServer::Run()
 	CServerSocket server( m_pDeviceCfg->d_nPort );		
 	events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * EPOLL_SIZE);
 
-	g_Log.pushMsg( LOG_SERVER, "", szServerName + "start");
+	g_Log.pushMsg( LOG_SERVER, "LOG", szServerName + "start");
 	
 	if((epollfd = epoll_create(100)) == -1) {
 		DBG_E_R("fail epoll create\r\n");
@@ -147,7 +147,7 @@ void CServer::Run()
 					sprintf(user_data->name, "%s:%d", inet_ntoa(pSock->m_addr.sin_addr), ntohs(pSock->m_addr.sin_port));
 
 					szMsg = szServerName + string("connected from ") + user_data->name;
-					g_Log.pushMsg( LOG_SERVER, "", szMsg);
+					g_Log.pushMsg( LOG_SERVER, "LOG", szMsg);
 					
 					SendInitMsg(pSock->m_nSock);
 					DBG_I_N("connect[%s] fd=%d\r\n", user_data->name, user_data->fd );
@@ -167,7 +167,7 @@ void CServer::Run()
 						DBG_I_N("disconnect[%s] fd=%d\r\n", user_data->name, user_data->fd);
 
 						szMsg = szServerName + string("disconnected   ") + user_data->name;
-						g_Log.pushMsg( LOG_SERVER, "", szMsg);
+						g_Log.pushMsg( LOG_SERVER, "LOG", szMsg);
 
 						epoll_ctl(epollfd, EPOLL_CTL_DEL, user_data->fd, events);
 
@@ -187,7 +187,7 @@ void CServer::Run()
 			usleep(1000);
 		}
 
-		g_Log.pushMsg( LOG_SERVER, "", szServerName + "stop");
+		g_Log.pushMsg( LOG_SERVER, "LOG", szServerName + "stop");
 
 	}
 	catch ( SocketException& e) {
