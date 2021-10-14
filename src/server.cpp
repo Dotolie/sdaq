@@ -241,7 +241,7 @@ int CServer::SendFeaturesAll(string &szEqpid, int nTrid, string &szFeature)
 	szMsg += " LOTID=(NULL) RECPID=(NULL) SENSOR_VALUES=";
 	szMsg += szFeature;
 
-	DBG("SendFeatureAll:%s\r\n", szMsg.c_str());	
+//	DBG("SendFeatureAll:%s\r\n", szMsg.c_str());	
 
 
 	Lock();

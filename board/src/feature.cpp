@@ -36,6 +36,13 @@
 CFeature::CFeature() : CBase(__func__)
 {
 	DBG_I_C("create id=%p\r\n", GetId());
+
+	m_szFeatName[FT_AVG] = "AVG";
+	m_szFeatName[FT_MIN] = "MIN";
+	m_szFeatName[FT_MAX] = "MAX";
+	m_szFeatName[FT_RMS] = "RMS";
+	m_szFeatName[FT_SUM] = "SUM";
+	m_szFeatName[FT_P2P] = "P2P";
 }
 
 CFeature::~CFeature()
@@ -56,12 +63,13 @@ int CFeature::preprocessingWith(int nSRate, int nChSize, float **pfDatas)
 		m_fFeature[ch][FT_AVG] = fSum/nSRate;
 		}
 
+
 	for(int ch=0;ch<nChSize;ch++) {
 		for( int i=0;i<nSRate;i++) {
 			if( m_pfValParams[i].d_bEnableAvg )
-				pfDatas[ch][i] = m_pfValParams[i].d_fCvalue * ((m_pfValParams[i].d_fAvalue*(pfDatas[ch][i] - m_fFeature[ch][FT_AVG]))-m_pfValParams[i].d_fBvalue);
+				pfDatas[ch][i] = m_pfValParams[ch].d_fCvalue * ((m_pfValParams[ch].d_fAvalue*(pfDatas[ch][i] - m_fFeature[ch][FT_AVG]))-m_pfValParams[ch].d_fBvalue);
 			else
-				pfDatas[ch][i] = m_pfValParams[i].d_fCvalue * ((m_pfValParams[i].d_fAvalue*pfDatas[ch][i]) - m_pfValParams[i].d_fBvalue);
+				pfDatas[ch][i] = m_pfValParams[ch].d_fCvalue * ((m_pfValParams[ch].d_fAvalue*pfDatas[ch][i]) - m_pfValParams[ch].d_fBvalue);
 			}
 		}
 
@@ -76,7 +84,7 @@ int CFeature::processingWith(int nSRate, int nChSize, float **pfDatas)
 	float fTempMin = 0.0f;
 	float fTempMax = 0.0f;
 
-//	preprocessingWith(nSRate, nChSize, pfDatas);
+	preprocessingWith(nSRate, nChSize, pfDatas);
 		
 	for(int ch=0;ch<nChSize;ch++) {
 		fTempSq = 0.0f;
@@ -170,7 +178,7 @@ int CFeature::setSVID(int nIdx, string szConfig)
 	vResults = split(szConfig, '\n');
 
 	for (int i=0;i<vResults.size();i++){
-		DBG("i=%d, %s\r\n", i, vResults[i].c_str());
+//		DBG("i=%d, %s\r\n", i, vResults[i].c_str());
 		vContents = split(vResults[i], '=');
 		if (vContents.size() == 4) {
 			pSvid = new tSVID;
@@ -185,4 +193,28 @@ int CFeature::setSVID(int nIdx, string szConfig)
 	return nRet;
 }
 
+const string CFeature::getFeatNames(int nSvr)
+{
+	string szNames;
+	ptSVID pSvid;
+	long long lSvid;
+	map<long long, ptSVID>::iterator iter;
+
+	for(iter=m_mSvid[nSvr].begin(); iter!=m_mSvid[nSvr].end(); iter++){
+		lSvid = iter->first;
+		pSvid = iter->second;
+	
+		if( pSvid->nCh <= MAX_CH && pSvid->nFeature < FT_MAXNO) {
+			szNames += m_szFeatName[pSvid->nFeature] + ",";
+			}
+		}
+	szNames += "\n";
+
+	return szNames;
+}
+
+void CFeature::setParam(void* pParam)
+{
+	m_pfValParams = (fVAL_PARAM_t*)pParam;
+}
 

@@ -69,6 +69,14 @@ CLog::CLog() : CBase(__func__)
 
 	InitLock();
 	InitCond();
+
+	for(int i=0; i<MAX_SERVER; i++) {
+		m_pLog[i]=NULL;
+		}
+
+	m_nInp = 0;
+	m_nOut = 0;
+	m_nSize = 0;
 	
 	g_TaskMgr.AddTask(TASK_ID_LOG, this);
 }
@@ -76,6 +84,12 @@ CLog::CLog() : CBase(__func__)
 CLog::~CLog() 
 {
 	g_TaskMgr.DelTask(TASK_ID_LOG);
+
+	for(int i=0; i<MAX_SERVER; i++) {
+		if( m_pLog[i]!=NULL) {
+			fclose(m_pLog[i]);
+			}
+		}
 
 	DestCond();
 	DestLock();
@@ -113,9 +127,6 @@ int CLog::On_MSG_CREATE( long wparam, long lparam )
 	
 	DBG_I_Y("w=%ld, l=%ld\r\n", wparam, lparam);
 
-	m_nInp = 0;
-	m_nOut = 0;
-	m_nSize = 0;
 	
 	m_pThread = new Thread( new COutput(this) );
 	m_pThread->Start();
@@ -169,6 +180,30 @@ int CLog::openFile(  string &szEqpId, string &szLocation)
 	string sPath = OUT_FOLDER_PATH + szEqpId;
 	string sFileName;
 	string sPre = szEqpId + "_" + szLocation +"_";
+	string sExt = ".csv";
+
+	
+	sFileName = sPath + "/" + sPre + GetDateTime() + sExt;
+
+	getFileList(sPath, "csv");
+
+	DBG_I_N("fNme=%s\r\n", sFileName.c_str() );
+	
+	m_pFile = fopen( sFileName.c_str(), "a+");
+	if( m_pFile == NULL ) {
+		nRet = -1;
+		DBG_E_R("can't open, %s\r\n", sFileName.c_str());
+		}
+
+	return nRet;
+}
+
+int CLog::openRawFile()
+{
+	int nRet = 0;
+	string sPath = OUT_FOLDER_PATH + string("RAW");
+	string sFileName;
+	string sPre = "RAW_";
 	string sExt = ".csv";
 
 	
@@ -244,46 +279,6 @@ int CLog::openFile(   int nIdx, string szFolder)
 	return nRet;
 }
 
-int CLog::writeData(     int nSRate, int nChSize, float **pData)
-{
-	int nRet = 0;
-	int i = 0;
-	int j = 0;
-	char szTemp[32];
-	char szData[1024];	
-
-	for(i=0;i<nSRate;i++) {
-		szData[0]=0;
-		for(j=0;j<(nChSize-1);j++) {
-			sprintf(szTemp, "%.3f,", pData[j][i] );
-			strcat(szData, szTemp);
-			}
-		sprintf(szTemp, "%.3f\n", pData[j][i] );
-		strcat(szData, szTemp);
-		nRet = fwrite(szData, 1, strlen(szData), m_pFile);
-		fflush(m_pFile);
-		}
-
-//	DBG("i=%d, nRet=%d, sr=%d, ch=%d, len=%d\r\n", i, nRet, nSRate, nChSize, strlen(szData));
-	
-	return nRet;
-}
-
-void CLog::writeData(   int nIdx,  int nSRate, int nChSize, float **pData)
-{
-	int j;
-
-	try {
-		for(int i=0;i<nSRate;i++) {
-			for(j=0;j<(nChSize-1);j++) m_ofs[nIdx] << pData[j][i] << ",";
-			m_ofs[nIdx] << pData[j][i] << endl;
-			}
-		}
-	catch( ofstream::failure &e) {
-		DBG_E_R("nIdx=%d, %s\r\n", nIdx, e.what());
-		}
-}
-
 int CLog::writeString(   string szMsg ) 
 {
 	int nRet = 0;
@@ -323,7 +318,7 @@ void CLog::writeString(  int nIdx, string szMsg )
 		
 }
 
-int CLog::closeFile()
+int CLog::closeRawFile()
 {
 	int nRet = 0;
 
@@ -416,40 +411,149 @@ int CLog::getFileList(string szFolder, string szExt )
 	return nRet;
 }
 
-int CLog::setParam(  int nIdx, string &szEqpId, string &szLocation)
+int CLog::getFileList(string szFolder, string szExt, int nMax )
+{
+	int nRet = -1;
+	DIR *dir = NULL;
+	struct dirent *diread = NULL;
+	string szName;
+	
+	if ((dir = opendir(szFolder.c_str())) != nullptr) {
+		while ((diread = readdir(dir)) != nullptr) {
+			szName = diread->d_name;
+			if( szName.find(szExt) != string::npos )
+				m_vFiles.push_back(szName);
+			}
+		closedir (dir);
+
+		sort(m_vFiles.begin(), m_vFiles.end(),[](string &s1, string &s2) { return s1 > s2; });
+		nRet = m_vFiles.size();
+#if 0
+		for (int i=0;i<nRet;i++)
+			DBG("i=%02d, %s\r\n", i, m_vFiles[i].c_str());
+		cout << endl;
+#endif
+
+		if( nRet >= nMax) {
+			for( int i=nRet;i>=nMax;i--) {
+				string szFile = szFolder;
+				szFile += "/" + m_vFiles[i-1];
+				remove(szFile.c_str());
+			
+//				DBG_I_N("delete i=%02d, %s\r\n", i, szFile.c_str());			
+				}
+			}
+
+		m_vFiles.clear();
+		
+		}
+	else {
+		if (mkdir(szFolder.c_str(), 0777) != -1) {
+			DBG_I_Y("OK mkdir(%s)\r\n", szFolder.c_str());
+			nRet = 0;
+			}
+	    else {
+		    DBG_E_R("error! mkdir(%s)\r\n", szFolder.c_str());
+	    	}
+		}
+	
+
+	return nRet;
+}
+
+int CLog::setParam(  int nIdx, string &szEqpId, string &szData)
 {
 	int nRet = 0;
 
 	m_szEqpId[nIdx] = szEqpId;
-	m_szLocation[nIdx] = szLocation;
+	m_szFeatNames[nIdx] = szData;
 
 	return nRet;
 }
 
-int CLog::putDatas( string szMsg)
+int CLog::IsFileExists(const char* filename)
+{
+    FILE *file;
+    if (file = fopen(filename, "r"))
+    {
+        fclose(file);
+        return 1;
+    }
+
+    return 0;
+}
+
+FILE* CLog::checkLogFile( int nSvr)
+{
+	int nExistFile = 0;
+	string szDate = GetDateTime6();
+
+	if( m_szFileDate[nSvr].compare(szDate) != 0 ) {
+		if( m_pLog[nSvr] != NULL ) {
+			DBG_I_C("fclose, svr=%d, now=%s, file=%s\r\n", nSvr, szDate.c_str(), m_szFileDate[nSvr].c_str());
+			fclose(m_pLog[nSvr]);
+			m_pLog[nSvr] = NULL;
+			}
+		}
+	
+	if( m_pLog[nSvr] == NULL ) {
+		string sPath = OUT_FOLDER_PATH + m_szEqpId[nSvr];
+		string sFileName;
+		string sPre = m_szEqpId[nSvr] + "_" + to_string(nSvr+1) +"_";
+		string sExt = ".csv";
+
+		m_szFileDate[nSvr] = szDate;
+		sFileName = sPath + "/" + sPre + szDate + sExt;
+	
+		getFileList(sPath, "csv", 7);
+
+		nExistFile = IsFileExists(sFileName.c_str());
+
+		m_pLog[nSvr] = fopen( sFileName.c_str(), "a+");
+		if( m_pLog[nSvr] == NULL ) {
+			DBG_E_R("can't open, %s\r\n", sFileName.c_str());
+			}
+		else {
+			if( nExistFile != 1 ) {
+				string szHead = makeHeader(nSvr);
+				fwrite(szHead.c_str(), 1, szHead.length(), m_pLog[nSvr]);
+				fflush(m_pLog[nSvr]);
+				}
+			}
+		
+		}
+
+	return m_pLog[nSvr];
+}
+
+int CLog::writeLog( int nSvr, string szMsg)
 {
 	int nRet = 0;
+	char szTemp[4096];
+	FILE *pFile = NULL;
 
+	pFile = checkLogFile(nSvr);
 
-
+	if( pFile != NULL) {
+		sprintf(szTemp, "%s\n", szMsg.c_str());
+		fwrite(szTemp, 1, strlen(szTemp), pFile);
+		fflush(pFile);
+		}
 	
-	DBG_I_N("msg=%s\r\n", szMsg.c_str());
+//	DBG_I_N("svr=%d, msg=%s\r\n", nSvr, szMsg.c_str());
 
 	return nRet;
 }
 
-int CLog::putDatas( int nSRate, int nChSize, float **pData)
+int CLog::putDatas( float **pData)
 {
 	int nRet = 0;
 	int i = 0;
 	int j = 0;
 
 
-	m_nSRate = nSRate;
-	m_nCSize = nChSize;
-
-	for(j=0;j<nChSize;j++) {
-		memcpy(m_fRawData[m_nInp][j], pData[j], nSRate*4);
+	for(j=0;j<m_nCSize;j++) {
+		memcpy(m_fRawData[m_nInp][j], pData[j], m_nSRate*4);
 		}
 	m_nInp++;
 	m_nInp %= 10;
@@ -464,23 +568,20 @@ int CLog::putDatas( int nSRate, int nChSize, float **pData)
 
 const string CLog::makeHeader()
 {
-	int i;
-	int nSSize	= m_nSRate;
-	int nChSize = m_nCSize;
-	
+	int i = 0;
 	string szTitle = "Version, Start Time, Channel Cnt, Sampling\n";
-
 	string szVersion = "Ver";
+	
 	szVersion += VERSION;
 	szVersion += ", ";
 	szVersion += GetDateTime2();
-	szVersion += ", " + to_string(nChSize);
-	szVersion += ", " + to_string(nSSize);
+	szVersion += ", " + to_string(m_nCSize);
+	szVersion += ", " + to_string(m_nSRate);
 	szVersion += "\n";
 
 
 	string szContents = "";
-	for(i=0;i<(nChSize-1);i++) szContents +="CH" + to_string(i+1) + ",";
+	for(i=0;i<(m_nCSize-1);i++) szContents +="CH" + to_string(i+1) + ",";
 	szContents += "CH" + to_string(i+1) + "\n";
 	
 	string szHeader = szTitle;
@@ -490,7 +591,26 @@ const string CLog::makeHeader()
 	return szHeader;
 }
 
-int CLog::writeData(  int nSvr)
+const string CLog::makeHeader(int nSvr)
+{
+	string szTitle = "Version, Start Time, Channel Cnt, Sampling\n";
+	string szVersion = "Ver";
+	
+	szVersion += VERSION;
+	szVersion += ", ";
+	szVersion += GetDateTime2();
+	szVersion += ", " + to_string(m_nCSize);
+	szVersion += ", " + to_string(m_nSRate);
+	szVersion += "\n";
+
+	string szHeader = szTitle;
+	szHeader += szVersion;
+	szHeader += m_szFeatNames[nSvr];
+	
+	return szHeader;
+}
+
+int CLog::writeRawData()
 {
 	int nRet = 0;
 	int i = 0;
@@ -508,7 +628,7 @@ int CLog::writeData(  int nSvr)
 	if( m_nSize > 0 ) {
 	
 		if( nIdx == 0 )	{ 
-			openFile( m_szEqpId[nSvr], m_szLocation[nSvr]);
+			openRawFile();
 			writeString( makeHeader() );
 			DBG_I_G("openfile\r\n");
 			usleep(1000);
@@ -535,7 +655,9 @@ int CLog::writeData(  int nSvr)
 				nVal = (int)m_fRawData[m_nOut][j][i];
 				nMan = (int)(m_fRawData[m_nOut][j][i]*1000 - (nVal * 1000)); 
 				fprintf(m_pFile, "%d.%d,", nVal, nMan );
+//				printf("i=%d, j=%d, %f, %d, %d\r\n", i, j, m_fRawData[m_nOut][j][i], nVal, nMan );
 				}
+
 			nVal = (int)m_fRawData[m_nOut][j][i];
 			nMan = (int)(m_fRawData[m_nOut][j][i]*1000 - (nVal * 1000)); 
 			fprintf(m_pFile, "%d.%d\n", nVal, nMan );
@@ -548,7 +670,7 @@ int CLog::writeData(  int nSvr)
 		nIdx++;
 		
 		if( nIdx >= nLoop) {
-			closeFile();
+			closeRawFile();
 			DBG_I_Y("closefile : nIdx=%d\r\n", nIdx);
 			nIdx = 0;
 			}
@@ -562,4 +684,15 @@ int CLog::writeData(  int nSvr)
 	
 	return nRet;
 }
+
+void CLog::setCHSize(int nSize)
+{
+	m_nCSize = nSize;
+}
+
+void CLog::setSampleRate(int nRate)
+{
+	m_nSRate = nRate;
+}
+
 

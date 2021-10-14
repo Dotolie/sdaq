@@ -58,7 +58,9 @@ public:
 	int		m_nCSize;
 	string	m_szPath;
 	string	m_szEqpId[MAX_SERVER];
-	string	m_szLocation[MAX_SERVER];
+	string	m_szFeatNames[MAX_SERVER];
+	string	m_szFileDate[MAX_SERVER];
+	FILE	*m_pLog[MAX_SERVER];
 
 	int		m_nInp;
 	int		m_nOut;
@@ -74,20 +76,21 @@ public:
 	void openFile( int nIdx, string szFolder, string &szEqpId, string &szLocation );
 	int openFile( int nIdx, string szFolder );	
 	void pushMsg( int nIdx, string szFolder, string szMsg );	
-	void writeData( int nIdx, int nSRate, int nChSize, float **pData);
 	void writeString( int nIdx, string &szMsg );
 	void writeString( int nIdx, string szMsg );	
 	void closeFile( int nIdx );
-
+	void setCHSize(int);
+	void setSampleRate(int);
+	
 	int openFile(     string &szEqpId, string &szLocation );
-	int writeData( int nSRate, int nChSize, float **pData);
+	int openRawFile();
 	int writeString( string szMsg );
-	int closeFile();
+	int closeRawFile();
 
 	int setParam( int, string &szEqpId, string &szLocation);
-	int putDatas( string szMsg);
-	int putDatas( int nSRate, int nChSize, float **pData);
-	int writeData(int);
+	int writeLog( int, string szMsg);
+	int putDatas( float **pData);
+	int writeRawData();
 
 	
 private:
@@ -97,7 +100,11 @@ private:
 	int On_MSG_TIMER( long, long );
 
 	int getFileList(string szFolder, string szExt);
+	int getFileList(string szFolder, string szExt, int );	
 	const string makeHeader();
+	const string makeHeader(int);	
+	FILE* checkLogFile( int nSvr);
+	int IsFileExists(const char* filename);
 
 private:
 	Thread *m_pThread;

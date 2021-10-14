@@ -95,21 +95,16 @@ void CDsp::Run()
 	int nChSize = m_pCore->m_pAdcConfig->m_nChSize;
 	CFeature sFeature;
 	
-	sFeature.m_pfValParams = m_pCore->m_pAdcConfig->m_fValParams;
-#if 0
-	for(int i=0;i<MAX_CH;i++) {
-		DBG_I_N("i=%d, Enable=%d, A=%f, B=%f, C=%f\r\n"
-			, i
-			, sFeature.m_pfValParams[i].d_bEnableAvg
-			, sFeature.m_pfValParams[i].d_fAvalue
-			, sFeature.m_pfValParams[i].d_fBvalue
-			, sFeature.m_pfValParams[i].d_fCvalue);
-		}
-#endif	
+	sFeature.setParam( (void*)m_pCore->m_pAdcConfig->m_fValParams);
+
+	g_Log.setCHSize( nChSize );
+	g_Log.setSampleRate( nSSize );
+	
 	for(int i=0;i<MAX_SERVER;i++) {
 		if( m_pConfig->m_SeverCfg[i].d_nValid != 0) {
 			sFeature.setSVID( i, m_pConfig->m_SeverCfg[i].d_sSVID);
-			g_Log.setParam( i, m_pConfig->m_SeverCfg[i].d_sEqpID, m_pConfig->m_SeverCfg[i].d_sLocation);
+			string szNames = sFeature.getFeatNames(i);
+			g_Log.setParam( i, m_pConfig->m_SeverCfg[i].d_sEqpID, szNames);
 			}
 		}
 	
@@ -143,7 +138,7 @@ void CDsp::Run()
 
 			if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_LOGGING) {
 				lElaps = GetMicrosecondCount();
-				g_Log.putDatas( nSSize, nChSize, pfData);
+				g_Log.putDatas(pfData);
 				lElaps = GetMicrosecondCount() - lElaps;
 //				DBG_I_C("Log elapsed time=%ld\r\n", lElaps);
 				}
@@ -158,7 +153,7 @@ void CDsp::Run()
 						m_pCore->m_pServer[i]->SendFeaturesAll(m_pConfig->m_SeverCfg[i].d_sEqpID, m_pConfig->m_SeverCfg[i].d_nTRID, szFeatrues);
 						if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_MIXED ) {
 							string szValues = sFeature.getFeatureValues(i);
-							g_Log.putDatas(szValues);
+							g_Log.writeLog(i, szValues);
 							}
 						}
 					}
@@ -167,9 +162,7 @@ void CDsp::Run()
 				
 //				DBG("%s\r\n", szFeatrues.c_str());
 				}
-			
 
-			
 			ret++;
 			usleep(10);
 			}

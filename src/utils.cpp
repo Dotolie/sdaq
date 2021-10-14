@@ -127,6 +127,17 @@ const string GetDateTime5()
 	return pBuf;
 }
 
+const string GetDateTime6()
+{
+    time_t     now = time(0); //현재 시간을 time_t 타입으로 저장
+    struct tm  tstruct;
+	char 	pBuf[80];
+    tstruct = *localtime(&now);
+    strftime(pBuf, sizeof(pBuf), "%Y%m%d", &tstruct); // YYYY-MM-DD.HH 형태의 스트링
+
+	return pBuf;
+}
+
 struct timeval GetTimeVal()
 {
 	struct timeval tv;

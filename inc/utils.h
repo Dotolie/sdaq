@@ -45,6 +45,7 @@ const std::string GetDateTime2();
 const std::string GetDateTime3();
 const std::string GetDateTime4();
 const std::string GetDateTime5();
+const std::string GetDateTime6();
 
 struct timeval GetTimeVal();
 long int GetMicrosecondCount();

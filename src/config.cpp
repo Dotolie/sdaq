@@ -40,11 +40,11 @@
 #define CONFIG_FILE_NAME_5		"./FDC_CONFIG5.cfg"
 
 
-static char *szFName[MAX_HSPEED_CH] ={ CONFIG_FILE_NAME_1, 
-										CONFIG_FILE_NAME_2,
-										CONFIG_FILE_NAME_3,
-										CONFIG_FILE_NAME_4,
-										CONFIG_FILE_NAME_5 };
+static char *szFName[MAX_SERVER] ={ CONFIG_FILE_NAME_1, 
+									CONFIG_FILE_NAME_2,
+									CONFIG_FILE_NAME_3,
+									CONFIG_FILE_NAME_4,
+									CONFIG_FILE_NAME_5 };
 
 
 CConfig::CConfig() : CBase(__func__)
@@ -64,7 +64,7 @@ int CConfig::Load()
 	int nInterval = 0;
 	string sSVID;
 
-	for(int i=0;i<MAX_HSPEED_CH;i++) {
+	for(int i=0;i<MAX_SERVER;i++) {
 		INIReader *pReader = new INIReader(szFName[i]);
 		if( pReader->ParseError() < 0 ) {
 			DBG_E_R("%s does't exist\r\n", szFName[i]);

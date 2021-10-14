@@ -186,8 +186,8 @@ int CSensor::LoadOffsetFile()
 
 	delete pReader;
 
-//	for(int ch=0;ch<MAX_CHANNEL;ch++) 
-//		DBG_I_N("ch[%d]off=%d, ch[%d]scale=%lf\r\n",  ch, m_Parameter[ch].d_sOffset, ch, m_Parameter[ch].d_fScale);
+//	for(int ch=0;ch<MAX_CH;ch++) 
+//		DBG_I_N("ch[%d] off=%d, scale=%lf\r\n",  ch, m_Parameter[ch].d_sOffset, m_Parameter[ch].d_fScale);
 
 	return 0;
 }
