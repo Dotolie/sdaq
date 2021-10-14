@@ -174,30 +174,6 @@ int CLog::On_MSG_QUIT( long wparam, long lparam )
 	return 0;
 }
 
-int CLog::openFile(  string &szEqpId, string &szLocation)
-{
-	int nRet = 0;
-	string sPath = OUT_FOLDER_PATH + szEqpId;
-	string sFileName;
-	string sPre = szEqpId + "_" + szLocation +"_";
-	string sExt = ".csv";
-
-	
-	sFileName = sPath + "/" + sPre + GetDateTime() + sExt;
-
-	getFileList(sPath, "csv");
-
-	DBG_I_N("fNme=%s\r\n", sFileName.c_str() );
-	
-	m_pFile = fopen( sFileName.c_str(), "a+");
-	if( m_pFile == NULL ) {
-		nRet = -1;
-		DBG_E_R("can't open, %s\r\n", sFileName.c_str());
-		}
-
-	return nRet;
-}
-
 int CLog::openRawFile()
 {
 	int nRet = 0;
@@ -220,35 +196,6 @@ int CLog::openRawFile()
 		}
 
 	return nRet;
-}
-
-void CLog::openFile(   int nIdx, string szFolder, string &szEqpId, string &szLocation)
-{
-	string sPath = OUT_FOLDER_PATH + szFolder;
-	string sFileName;
-	string sPre = szEqpId + "_" + szLocation +"_";
-	string sExt = ".csv";
-
-	
-	sFileName = sPath + "/" + sPre + GetDateTime() + sExt;
-
-	getFileList(sPath, "csv");
-
-	DBG_I_N("fNme=%s, nIdx=%d\r\n", sFileName.c_str(), nIdx );
-	
-	m_ofs[nIdx].exceptions(ofstream::badbit | ofstream::failbit);
-
-	try {
-		m_ofs[nIdx].open(sFileName);
-		
-		m_ofs[nIdx].setf(ios::fixed);
-		m_ofs[nIdx].setf(ios::showpoint);	
-		m_ofs[nIdx].precision(3);	
-		}
-	catch( ofstream::failure &e) {
-		DBG_E_R("nIdx=%d, %s\r\n", nIdx, e.what());
-		}
-	
 }
 
 int CLog::openFile(   int nIdx, string szFolder)
@@ -461,14 +408,10 @@ int CLog::getFileList(string szFolder, string szExt, int nMax )
 	return nRet;
 }
 
-int CLog::setParam(  int nIdx, string &szEqpId, string &szData)
+void CLog::setParam(  int nIdx, string &szEqpId, string &szData)
 {
-	int nRet = 0;
-
 	m_szEqpId[nIdx] = szEqpId;
 	m_szFeatNames[nIdx] = szData;
-
-	return nRet;
 }
 
 int CLog::IsFileExists(const char* filename)

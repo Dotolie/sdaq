@@ -73,24 +73,24 @@ public:
 
 	virtual int MsgProc(int message, long wparam, long lparam);
 
-	void openFile( int nIdx, string szFolder, string &szEqpId, string &szLocation );
+	int openRawFile();
 	int openFile( int nIdx, string szFolder );	
-	void pushMsg( int nIdx, string szFolder, string szMsg );	
+
 	void writeString( int nIdx, string &szMsg );
 	void writeString( int nIdx, string szMsg );	
-	void closeFile( int nIdx );
-	void setCHSize(int);
-	void setSampleRate(int);
-	
-	int openFile(     string &szEqpId, string &szLocation );
-	int openRawFile();
 	int writeString( string szMsg );
+	int writeLog( int, string szMsg);
+	int writeRawData();
+
+	void closeFile( int nIdx );
 	int closeRawFile();
 
-	int setParam( int, string &szEqpId, string &szLocation);
-	int writeLog( int, string szMsg);
+	void setCHSize(int);
+	void setSampleRate(int);
+	void setParam( int, string &szEqpId, string &szLocation);
+	
 	int putDatas( float **pData);
-	int writeRawData();
+	void pushMsg( int nIdx, string szFolder, string szMsg );	
 
 	
 private:
