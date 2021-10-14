@@ -63,10 +63,9 @@ int CFeature::preprocessingWith(int nSRate, int nChSize, float **pfDatas)
 		m_fFeature[ch][FT_AVG] = fSum/nSRate;
 		}
 
-
 	for(int ch=0;ch<nChSize;ch++) {
 		for( int i=0;i<nSRate;i++) {
-			if( m_pfValParams[i].d_bEnableAvg )
+			if( m_pfValParams[ch].d_bEnableAvg )
 				pfDatas[ch][i] = m_pfValParams[ch].d_fCvalue * ((m_pfValParams[ch].d_fAvalue*(pfDatas[ch][i] - m_fFeature[ch][FT_AVG]))-m_pfValParams[ch].d_fBvalue);
 			else
 				pfDatas[ch][i] = m_pfValParams[ch].d_fCvalue * ((m_pfValParams[ch].d_fAvalue*pfDatas[ch][i]) - m_pfValParams[ch].d_fBvalue);

@@ -303,7 +303,7 @@ void CSensor::Run()
 			Lock();
 			m_nPageOut = m_nPageIn;
 			m_nPageIn++;
-			m_nPageIn %= 2;
+			m_nPageIn %= MAX_PG;
 			Signal();
 			Unlock();
 			
