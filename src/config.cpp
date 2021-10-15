@@ -129,7 +129,7 @@ int CConfig::Save(int nIdx)
 	ss << "; " << endl;
 	ss << "; SVID = (label)=(uid)=(chNo)=(featNo)" << endl;
 	ss << "; chNO : 1 ~ 20 " << endl;
-	ss << "; featNo : 1 (min), 2 (max), 3 (avg), 4 (sum), 5 (p2p)" << endl;
+	ss << "; featNo : 1 (min), 2 (max), 3 (rms), 4 (sum), 5 (p2p)" << endl;
 	ss << "; " << endl;
 	ss << endl;
 
