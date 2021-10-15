@@ -178,7 +178,7 @@ int CSensor::LoadOffsetFile()
 		}	
 	else {
 		for(int i=0;i<MAX_CH;i++) {
-			string szSection = "ch" + to_string(i+1);
+			string szSection = "ch" + to_string(i);
 			m_Parameter[i].d_sOffset= pReader->GetInteger(szSection, "offset", 0);
 			m_Parameter[i].d_fScale	= pReader->GetReal(szSection, "scale", 1);
 			}
@@ -205,7 +205,7 @@ int CSensor::SaveOffsetFile(PARAMS_t *pParam, int nEnc)
 	ss << ";" << std::endl << endl;
 
 	for(int i=0;i<MAX_CH;i++) {
-		string szSection = "[ch" + to_string(i+1) + "]";
+		string szSection = "[ch" + to_string(i) + "]";
 
 		ss << szSection << endl;
 		ss << "offset = "	<< pParam[i].d_sOffset << endl;
