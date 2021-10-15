@@ -70,7 +70,10 @@ int CConfig::Load()
 			DBG_E_R("%s does't exist\r\n", szFName[i]);
 			m_SeverCfg[i].d_nValid = 0x0;
 			SetDefault(i);
-			Save(i);
+			if( i == 0 ) {
+				m_SeverCfg[i].d_nValid = 0xaf01af01;
+				Save(i);
+				}
 			}
 		else {
 			m_SeverCfg[i].d_nValid = 0xaf01af01;
@@ -153,7 +156,7 @@ int CConfig::Save(int nIdx)
 	ss << "SVID = " << m_SeverCfg[nIdx].d_sSVID << endl;
 	ss << endl;
 
-	outFile.open(CONFIG_FILE_NAME);
+	outFile.open(CONFIG_FILE_NAME_1);
 	outFile << ss.rdbuf();
 	outFile.close();
 
