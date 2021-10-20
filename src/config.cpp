@@ -77,19 +77,19 @@ int CConfig::Load()
 			}
 		else {
 			m_SeverCfg[i].d_nValid = 0xaf01af01;
-			m_SeverCfg[i].d_nInterval = pReader->GetInteger("FDC", "Interval", 1000);
-			m_SeverCfg[i].d_nPort = pReader->GetInteger("FDC", "Port", 9001);
-			m_SeverCfg[i].d_sDestSubject = pReader->Get("FDC", "DestSubject", "");
-			m_SeverCfg[i].d_sReplySubject = pReader->Get("FDC", "ReplySubject", "");
-			m_SeverCfg[i].d_sAppName = pReader->Get("FDC", "AppName", "");
-			m_SeverCfg[i].d_sProcName = pReader->Get("FDC", "ProcName", "");
-			m_SeverCfg[i].d_nSeqNo = pReader->GetInteger("FDC", "SeqNo", 1);
-			m_SeverCfg[i].d_sEqpID = pReader->Get("FDC", "EqpID", "EQ01");
-			m_SeverCfg[i].d_sModuleID = pReader->Get("FDC", "ModuleID", "MOD01");
-			m_SeverCfg[i].d_sToolID = pReader->Get("FDC", "ToolID", "TOOL01");
-			m_SeverCfg[i].d_sLocation = pReader->Get("FDC", "Location", "H1S4");
-			m_SeverCfg[i].d_nTRID = pReader->GetInteger("FDC", "TRID", 1);
-			m_SeverCfg[i].d_nSMPLN = pReader->GetInteger("FDC", "SMPLN", 1);
+			m_SeverCfg[i].d_nInterval = pReader->GetInteger("COMMON", "Interval", 1000);
+			m_SeverCfg[i].d_nPort = pReader->GetInteger("COMMON", "Port", 9001);
+			m_SeverCfg[i].d_sDestSubject = pReader->Get("COMMON", "DestSubject", "");
+			m_SeverCfg[i].d_sReplySubject = pReader->Get("COMMON", "ReplySubject", "");
+			m_SeverCfg[i].d_sAppName = pReader->Get("COMMON", "AppName", "");
+			m_SeverCfg[i].d_sProcName = pReader->Get("COMMON", "ProcName", "");
+			m_SeverCfg[i].d_nSeqNo = pReader->GetInteger("COMMON", "SeqNo", 1);
+			m_SeverCfg[i].d_sEqpID = pReader->Get("COMMON", "EqpID", "EQ01");
+			m_SeverCfg[i].d_sModuleID = pReader->Get("COMMON", "ModuleID", "MOD01");
+			m_SeverCfg[i].d_sToolID = pReader->Get("COMMON", "ToolID", "TOOL01");
+			m_SeverCfg[i].d_sLocation = pReader->Get("COMMON", "Location", "H1S4");
+			m_SeverCfg[i].d_nTRID = pReader->GetInteger("COMMON", "TRID", 1);
+			m_SeverCfg[i].d_nSMPLN = pReader->GetInteger("COMMON", "SMPLN", 1);
 
 			m_SeverCfg[i].d_sSVID = pReader->Get("SVID", "SVID", "");
 #if 0
@@ -136,7 +136,7 @@ int CConfig::Save(int nIdx)
 	ss << "; " << endl;
 	ss << endl;
 
-	ss << "[FDC]" << endl;
+	ss << "[COMMON]" << endl;
 	ss << "Interval = "<< m_SeverCfg[nIdx].d_nInterval << endl;
 	ss << "Port = " << m_SeverCfg[nIdx].d_nPort << endl;
 	ss << "DestSubject = " << m_SeverCfg[nIdx].d_sDestSubject << endl;
@@ -156,7 +156,7 @@ int CConfig::Save(int nIdx)
 	ss << "SVID = " << m_SeverCfg[nIdx].d_sSVID << endl;
 	ss << endl;
 
-	outFile.open(CONFIG_FILE_NAME_1);
+	outFile.open(CONFIG_FILE_NAME);
 	outFile << ss.rdbuf();
 	outFile.close();
 
