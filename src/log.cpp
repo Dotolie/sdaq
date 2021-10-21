@@ -597,17 +597,19 @@ int CLog::writeRawData()
 			for(j=0;j<(m_nCSize-1);j++) {
 				nVal = (int)m_fRawData[m_nOut][j][i];
 				nMan = (int)(m_fRawData[m_nOut][j][i]*1000 - (nVal * 1000)); 
+				if( nMan < 0 ) nMan *= -1;
 				fprintf(m_pFile, "%d.%d,", nVal, nMan );
 //				printf("i=%d, j=%d, %f, %d, %d\r\n", i, j, m_fRawData[m_nOut][j][i], nVal, nMan );
 				}
 
 			nVal = (int)m_fRawData[m_nOut][j][i];
 			nMan = (int)(m_fRawData[m_nOut][j][i]*1000 - (nVal * 1000)); 
+			if( nMan < 0 ) nMan *= -1;
 			fprintf(m_pFile, "%d.%d\n", nVal, nMan );
 			}
 #endif
 		m_nOut++;
-		m_nOut %= 10;
+		m_nOut %= 60;
 		
 		m_nSize--;
 		nIdx++;
