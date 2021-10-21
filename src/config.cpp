@@ -70,10 +70,12 @@ int CConfig::Load()
 			DBG_E_R("%s does't exist\r\n", szFName[i]);
 			m_SeverCfg[i].d_nValid = 0x0;
 			SetDefault(i);
+#if 0
 			if( i == 0 ) {
 				m_SeverCfg[i].d_nValid = 0xaf01af01;
 				Save(i);
 				}
+#endif			
 			}
 		else {
 			m_SeverCfg[i].d_nValid = 0xaf01af01;
