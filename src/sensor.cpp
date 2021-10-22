@@ -292,7 +292,12 @@ void CSensor::Run()
 #else
 		for(int i=0;i<nPSize;i++) {
 			for(int c=0;c<nChSize;c++) {
-				m_fRawData[m_nPageIn][c][i + nOffset*nPSize] = 	(psData[i*8 + (c%4) + (c/4)*1024] - m_Parameter[c].d_sOffset) * m_Parameter[c].d_fScale;
+				if( nChSize == 5 ) {
+					m_fRawData[m_nPageIn][c][i + nOffset*nPSize] = 	(psData[i + c*1024] - m_Parameter[c].d_sOffset) * m_Parameter[c].d_fScale;
+					}
+				else {
+					m_fRawData[m_nPageIn][c][i + nOffset*nPSize] = 	(psData[i*8 + (c%4) + (c/4)*1024] - m_Parameter[c].d_sOffset) * m_Parameter[c].d_fScale;
+					}
 //				DBG("i=%d, i=%d, c=%d, d[%d][%d] = s[%d]\r\n", (i + nOffset*nPSize), i, c, c, (i + nOffset*nPSize), (i*8 + (c%4) + (c/4)*1024));
 				}
 			}

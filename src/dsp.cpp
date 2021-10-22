@@ -138,6 +138,7 @@ void CDsp::Run()
 
 			if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_LOGGING) {
 				lElaps = GetMicrosecondCount();
+				sFeature.preprocessingWith(nSSize, nChSize, pfData);
 				g_Log.putDatas(pfData);
 				lElaps = GetMicrosecondCount() - lElaps;
 //				DBG_I_C("Log elapsed time=%ld\r\n", lElaps);
@@ -145,7 +146,8 @@ void CDsp::Run()
 
 			if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_REALTIME || m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_MIXED ) {
 				lElaps = GetMicrosecondCount();
-				
+
+				sFeature.preprocessingWith(nSSize, nChSize, pfData);
 				sFeature.processingWith(nSSize, nChSize, pfData);
 				for(int i=0;i<MAX_SERVER;i++) {
 					if( m_pConfig->m_SeverCfg[i].d_nValid != 0) {

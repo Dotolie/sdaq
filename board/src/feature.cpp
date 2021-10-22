@@ -83,7 +83,6 @@ int CFeature::processingWith(int nSRate, int nChSize, float **pfDatas)
 	float fTempMin = 0.0f;
 	float fTempMax = 0.0f;
 
-	preprocessingWith(nSRate, nChSize, pfDatas);
 		
 	for(int ch=0;ch<nChSize;ch++) {
 		fTempSq = 0.0f;

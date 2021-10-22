@@ -67,7 +67,7 @@ protected:
 	string m_szFeatName[FT_MAXNO];
 	map<long long, ptSVID> m_mSvid[MAX_SERVER];
 	vector<string> split(string input, char delimiter);
-	int preprocessingWith(int nSRate, int nChSize, float **pfDatas);
+
 	
 public:
 	fVAL_PARAM_t *m_pfValParams;
@@ -78,6 +78,7 @@ public:
 
 	int setSVID(int, string szConfig);
 	int processingWith(int nSRate, int nChSize, float **pfDatas);	
+	int preprocessingWith(int nSRate, int nChSize, float **pfDatas);
 	const string getFeatures(int);
 	const string getFeatureValues(int);	
 	const string getFeatNames(int nSvr);

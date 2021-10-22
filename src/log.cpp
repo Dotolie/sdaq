@@ -558,7 +558,7 @@ int CLog::writeRawData()
 	int nRet = 0;
 	int i = 0;
 	int j = 0;
-	int nLoop = 10;
+	int nLoop = 60;
 	int nVal;
 	int nMan;
 	
@@ -609,7 +609,7 @@ int CLog::writeRawData()
 			}
 #endif
 		m_nOut++;
-		m_nOut %= 60;
+		m_nOut %= 10;
 		
 		m_nSize--;
 		nIdx++;
