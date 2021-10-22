@@ -23,7 +23,7 @@
 #include <float.h>
 #include <iostream>
 #include <sstream>
-#include <math.h>
+#include <cmath>
 
 #include "feature.h"
 
@@ -91,7 +91,7 @@ int CFeature::processingWith(int nSRate, int nChSize, float **pfDatas)
 		fTempMax = -FLT_MAX;
 		for( int i=0;i<nSRate;i++) {
 			fTempSum += pfDatas[ch][i];
-			fTempSq = pfDatas[ch][i] * pfDatas[ch][i];
+			fTempSq += (pfDatas[ch][i] * pfDatas[ch][i]);
 			if( fTempMin > pfDatas[ch][i] ) fTempMin = pfDatas[ch][i];
 			if( fTempMax < pfDatas[ch][i] ) fTempMax = pfDatas[ch][i];			
 			}
