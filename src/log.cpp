@@ -72,6 +72,7 @@ CLog::CLog() : CBase(__func__)
 
 	for(int i=0; i<MAX_SERVER; i++) {
 		m_pLog[i]=NULL;
+		m_lFileDate[i] = 0;
 		}
 
 	m_nInp = 0;
@@ -429,11 +430,12 @@ int CLog::IsFileExists(const char* filename)
 FILE* CLog::checkLogFile( int nSvr)
 {
 	int nExistFile = 0;
-	string szDate = GetDateTime6();
+	long lNowSec = GetMicrosecondCount() / 1000000;
+	string szDate;
 
-	if( m_szFileDate[nSvr].compare(szDate) != 0 ) {
+	if( (m_lFileDate[nSvr]+86400) <= lNowSec  ) {
 		if( m_pLog[nSvr] != NULL ) {
-			DBG_I_C("fclose, svr=%d, now=%s, file=%s\r\n", nSvr, szDate.c_str(), m_szFileDate[nSvr].c_str());
+			DBG_I_C("fclose, svr=%d, now=%l, last+86400=%l\r\n", nSvr, lNowSec, m_lFileDate[nSvr]+86400);
 			fclose(m_pLog[nSvr]);
 			m_pLog[nSvr] = NULL;
 			}
@@ -445,7 +447,8 @@ FILE* CLog::checkLogFile( int nSvr)
 		string sPre = m_szEqpId[nSvr] + "_" + to_string(nSvr+1) +"_";
 		string sExt = ".csv";
 
-		m_szFileDate[nSvr] = szDate;
+		m_lFileDate[nSvr] = GetMicrosecondCount()/1000000;
+		szDate = GetDateTime6();
 		sFileName = sPath + "/" + sPre + szDate + sExt;
 	
 		getFileList(sPath, "csv", 7);

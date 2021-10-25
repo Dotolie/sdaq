@@ -133,7 +133,7 @@ const string GetDateTime6()
     struct tm  tstruct;
 	char 	pBuf[80];
     tstruct = *localtime(&now);
-    strftime(pBuf, sizeof(pBuf), "%Y%m%d", &tstruct); // YYYY-MM-DD.HH 형태의 스트링
+    strftime(pBuf, sizeof(pBuf), "%Y%m%d", &tstruct); // YYYY-MM-DD 형태의 스트링
 
 	return pBuf;
 }
