@@ -59,7 +59,7 @@ public:
 	string	m_szPath;
 	string	m_szEqpId[MAX_SERVER];
 	string	m_szFeatNames[MAX_SERVER];
-	long	m_lFileDate[MAX_SERVER];
+	long int	m_lFileDate[MAX_SERVER];
 	FILE	*m_pLog[MAX_SERVER];
 
 	int		m_nInp;

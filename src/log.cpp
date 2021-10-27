@@ -430,7 +430,7 @@ int CLog::IsFileExists(const char* filename)
 FILE* CLog::checkLogFile( int nSvr)
 {
 	int nExistFile = 0;
-	long lNowSec = GetMicrosecondCount() / 1000000;
+	long int lNowSec = (GetMicrosecondCount()/1000000);
 	string szDate;
 
 	if( (m_lFileDate[nSvr]+86400) <= lNowSec  ) {
@@ -447,7 +447,7 @@ FILE* CLog::checkLogFile( int nSvr)
 		string sPre = m_szEqpId[nSvr] + "_" + to_string(nSvr+1) +"_";
 		string sExt = ".csv";
 
-		m_lFileDate[nSvr] = GetMicrosecondCount()/1000000;
+		m_lFileDate[nSvr] =(GetMicrosecondCount()/1000000);
 		szDate = GetDateTime6();
 		sFileName = sPath + "/" + sPre + szDate + sExt;
 	
