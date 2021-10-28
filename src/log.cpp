@@ -72,7 +72,7 @@ CLog::CLog() : CBase(__func__)
 
 	for(int i=0; i<MAX_SERVER; i++) {
 		m_pLog[i]=NULL;
-		m_lFileDate[i] = 0;
+		m_tFileDate[i] = 0;
 		}
 
 	m_nInp = 0;
@@ -430,12 +430,13 @@ int CLog::IsFileExists(const char* filename)
 FILE* CLog::checkLogFile( int nSvr)
 {
 	int nExistFile = 0;
-	long int lNowSec = (GetMicrosecondCount()/1000000);
+	time_t tNowSec = GetSecondCount();
 	string szDate;
+	
 
-	if( (m_lFileDate[nSvr]+86400) <= lNowSec  ) {
+	if( (m_tFileDate[nSvr]+86400) <= tNowSec  ) {
 		if( m_pLog[nSvr] != NULL ) {
-			DBG_I_C("fclose, svr=%d, now=%l, last+86400=%l\r\n", nSvr, lNowSec, m_lFileDate[nSvr]+86400);
+			DBG_I_C("fclose, svr=%d, now=%ld, last+86400=%ld\r\n", nSvr, tNowSec, m_tFileDate[nSvr]+86400);
 			fclose(m_pLog[nSvr]);
 			m_pLog[nSvr] = NULL;
 			}
@@ -447,7 +448,7 @@ FILE* CLog::checkLogFile( int nSvr)
 		string sPre = m_szEqpId[nSvr] + "_" + to_string(nSvr+1) +"_";
 		string sExt = ".csv";
 
-		m_lFileDate[nSvr] =(GetMicrosecondCount()/1000000);
+		m_tFileDate[nSvr] = GetSecondCount();
 		szDate = GetDateTime6();
 		sFileName = sPath + "/" + sPre + szDate + sExt;
 	
@@ -551,6 +552,7 @@ const string CLog::makeHeader(int nSvr)
 
 	string szHeader = szTitle;
 	szHeader += szVersion;
+	szHeader += "Time,";
 	szHeader += m_szFeatNames[nSvr];
 	
 	return szHeader;

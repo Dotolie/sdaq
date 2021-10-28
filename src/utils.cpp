@@ -154,6 +154,13 @@ long int GetMicrosecondCount()
 	return tv.tv_sec*1000000 + tv.tv_usec;
 }
 
+time_t GetSecondCount()
+{
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return tv.tv_sec;
+}
+
 int WDI(int x)
 {
 	int nFd = 0;

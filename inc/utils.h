@@ -49,6 +49,7 @@ const std::string GetDateTime6();
 
 struct timeval GetTimeVal();
 long int GetMicrosecondCount();
+time_t GetSecondCount();
 
 int WDI(int x);
 int PWR_LED_G(int x);

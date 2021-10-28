@@ -124,45 +124,40 @@ void CDsp::Run()
 			else 		{ WDI(1);CPU_LED_R(1);}
 			bWDI = !bWDI;
 
-#if 0
-			for(int i=0;i<nSSize/100;i++) {
-				DBG("%04d : ", i);
-				for(int j=0;j<nChSize/4;j++) {
-					DBG("%6.3f, ", pfData[j][i]);
-					}
-				DBG("\r\n");
-				}
-#endif			
-			
-//			DBG("2-dsp---------%s, sRate=%d\r\n", GetDateTime3().c_str(), nSSize);
 
 			if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_LOGGING) {
 				lElaps = GetMicrosecondCount();
 				sFeature.preprocessingWith(nSSize, nChSize, pfData);
 				g_Log.putDatas(pfData);
-				lElaps = GetMicrosecondCount() - lElaps;
-//				DBG_I_C("Log elapsed time=%ld\r\n", lElaps);
-				}
-
-			if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_REALTIME || m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_MIXED ) {
-				lElaps = GetMicrosecondCount();
-
-				sFeature.preprocessingWith(nSSize, nChSize, pfData);
 				sFeature.processingWith(nSSize, nChSize, pfData);
 				for(int i=0;i<MAX_SERVER;i++) {
 					if( m_pConfig->m_SeverCfg[i].d_nValid != 0) {
 						string szFeatrues =	sFeature.getFeatures(i);
 						m_pCore->m_pServer[i]->SendFeaturesAll(m_pConfig->m_SeverCfg[i].d_sEqpID, m_pConfig->m_SeverCfg[i].d_nTRID, szFeatrues);
+						}
+					}
+				lElaps = GetMicrosecondCount() - lElaps;
+				DBG_I_C("Log elapsed time=%ld\r\n", lElaps);
+				}
+			else if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_REALTIME || m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_MIXED ) {
+				lElaps = GetMicrosecondCount();
+
+				sFeature.preprocessingWith(nSSize, nChSize, pfData);
+				sFeature.processingWith(nSSize, nChSize, pfData);
+				string szNow = GetDateTime2() + ",";
+				for(int i=0;i<MAX_SERVER;i++) {
+					if( m_pConfig->m_SeverCfg[i].d_nValid != 0) {
+						string szFeatrues =	sFeature.getFeatures(i);
+						m_pCore->m_pServer[i]->SendFeaturesAll(m_pConfig->m_SeverCfg[i].d_sEqpID, m_pConfig->m_SeverCfg[i].d_nTRID, szFeatrues);
 						if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_MIXED ) {
-							string szValues = sFeature.getFeatureValues(i);
+							string szValues = szNow + sFeature.getFeatureValues(i);
 							g_Log.writeLog(i, szValues);
 							}
 						}
 					}
 				lElaps = GetMicrosecondCount() - lElaps;
 				DBG_I_C("features elapsed time=%ld\r\n", lElaps);
-				
-//				DBG("%s\r\n", szFeatrues.c_str());
+
 				}
 
 			ret++;
