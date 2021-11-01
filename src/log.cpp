@@ -480,9 +480,9 @@ int CLog::writeLogData()
 	FILE *pFile = NULL;
 
 	for(int i=0;i<MAX_SERVER;i++) {
-		pFile = checkLogFile(i);
-
 		while( m_qLogData[i].size() > 0 ) {
+			pFile = checkLogFile(i);
+
 			if( pFile != NULL) {
 				string szMsg = m_qLogData[i].front();
 				sprintf(szTemp, "%s\n", szMsg.c_str());
