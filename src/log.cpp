@@ -480,17 +480,17 @@ int CLog::writeLogData()
 	FILE *pFile = NULL;
 
 	for(int i=0;i<MAX_SERVER;i++) {
-		while( m_qLogData[i].size() > 0 ) {
-			pFile = checkLogFile(i);
+		pFile = checkLogFile(i);
 
+		while( m_qLogData[i].size() > 0 ) {
 			if( pFile != NULL) {
 				string szMsg = m_qLogData[i].front();
 				sprintf(szTemp, "%s\n", szMsg.c_str());
 				fwrite(szTemp, 1, strlen(szTemp), pFile);
 				fflush(pFile);
-				m_qLogData[i].pop();			
 //				DBG_I_N("svr=%d, qSize=%d, msg=%s\r\n", i, m_qLogData[i].size(), szMsg.c_str());
 				}
+			m_qLogData[i].pop();
 			}
 		}
 
