@@ -28,6 +28,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <queue>
 
 #include "base.h"
 #include "object.h"
@@ -66,6 +67,8 @@ public:
 	int		m_nOut;
 	int		m_nSize;
 	float 	m_fRawData[10][20][65536];
+
+	queue<string> m_qLogData[MAX_SERVER];
 	
 public:
 	CLog();
@@ -79,7 +82,7 @@ public:
 	void writeString( int nIdx, string &szMsg );
 	void writeString( int nIdx, string szMsg );	
 	int writeString( string szMsg );
-	int writeLog( int, string szMsg);
+	int writeLogData();
 	int writeRawData();
 
 	void closeFile( int nIdx );
@@ -91,6 +94,7 @@ public:
 	
 	int putDatas( float **pData);
 	void pushMsg( int nIdx, string szFolder, string szMsg );	
+	int putLog( int nSvr, string &szMsg);
 
 	
 private:

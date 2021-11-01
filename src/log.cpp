@@ -473,21 +473,38 @@ FILE* CLog::checkLogFile( int nSvr)
 	return m_pLog[nSvr];
 }
 
-int CLog::writeLog( int nSvr, string szMsg)
+int CLog::writeLogData()
 {
 	int nRet = 0;
 	char szTemp[4096];
 	FILE *pFile = NULL;
 
-	pFile = checkLogFile(nSvr);
+	for(int i=0;i<MAX_SERVER;i++) {
+		while( m_qLogData[i].size() > 0 ) {
+			pFile = checkLogFile(i);
 
-	if( pFile != NULL) {
-		sprintf(szTemp, "%s\n", szMsg.c_str());
-		fwrite(szTemp, 1, strlen(szTemp), pFile);
-		fflush(pFile);
+			if( pFile != NULL) {
+				string szMsg = m_qLogData[i].front();
+				sprintf(szTemp, "%s\n", szMsg.c_str());
+				fwrite(szTemp, 1, strlen(szTemp), pFile);
+				fflush(pFile);
+				m_qLogData[i].pop();			
+//				DBG_I_N("svr=%d, qSize=%d, msg=%s\r\n", i, m_qLogData[i].size(), szMsg.c_str());
+				}
+			}
 		}
+
+
+	return nRet;
+}
+
+int CLog::putLog( int nSvr, string &szMsg)
+{
+	int nRet = 0;
+
+	m_qLogData[nSvr].push(szMsg);
 	
-//	DBG_I_N("svr=%d, msg=%s\r\n", nSvr, szMsg.c_str());
+//	DBG_I_Y("nSvr=%d, qSize=%d, msg=%s\r\n", nSvr, m_qLogData[nSvr].size(), szMsg.c_str());
 
 	return nRet;
 }

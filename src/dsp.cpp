@@ -151,7 +151,7 @@ void CDsp::Run()
 						m_pCore->m_pServer[i]->SendFeaturesAll(m_pConfig->m_SeverCfg[i].d_sEqpID, m_pConfig->m_SeverCfg[i].d_nTRID, szFeatrues);
 						if( m_pCore->m_pAdcConfig->m_AdcCfg.d_nMode == MODE_MIXED ) {
 							string szValues = szNow + sFeature.getFeatureValues(i);
-							g_Log.writeLog(i, szValues);
+							g_Log.putLog(i, szValues);
 							}
 						}
 					}

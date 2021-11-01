@@ -76,7 +76,9 @@ void COutput::Run()
 	while(IsRun()) {
 
 		m_pLog->writeRawData();
-
+		m_pLog->writeLogData();
+	
+		usleep(1);
 		}
 
 	DBG_I_N("end of loop \r\n");
